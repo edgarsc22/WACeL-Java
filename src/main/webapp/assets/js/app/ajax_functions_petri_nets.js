@@ -81,7 +81,7 @@ function show_petri_net(scenario_id){
 						root_node = '#'+id_node
 					}
 				}
-				if (type_node == "TRANSITION") {
+				if (type_node == "TRANSITION" || type_node == "TRANSITION_ALTERNATIVE") {
 					itemNode = {}
 					tmpNode = {}
 
@@ -385,7 +385,7 @@ function show_integrated_petri_net(project_id, scenario_id){
 					}
 					
 				}
-				if (type_node == "TRANSITION") {
+				if (type_node == "TRANSITION" || type_node == "TRANSITION_ALTERNATIVE") {
 					itemNode = {}
 					tmpNode = {}
 

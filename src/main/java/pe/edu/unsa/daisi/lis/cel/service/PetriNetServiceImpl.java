@@ -1470,6 +1470,7 @@ public class PetriNetServiceImpl implements IPetriNetService {
 					//guardar nodo
 				}
 				else {//TRANSITIONS
+					System.out.println(node.getType().name());
 					createXmlElementFromNodeTransition(net, document, node);
 				}
 			}
