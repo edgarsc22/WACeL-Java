@@ -556,34 +556,38 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 					defects.add(defect)	;								
 				}
 								
-				
-				if(!alternative.getSolution().isEmpty() && alternative.getSolutionStepWithGoToEpisode() > 0) {
-					//Indicator: The Alternative does not return to the main flow in the last solution step
-					if(!alternative.getSolutionStepWithGoToEpisode().equals(alternative.getSolution().size())) {
-						Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.ALTERNATIVE_ID.getScenarioElement(), alternativeId, 
-								QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
-								DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_GOTO_NOT_IN_LAST_ALTERNATE_SOLUTION_STEP_INDICATOR.getDefectIndicator(), alternative.getRawAlternative(), alternative.getSolutionStepWithGoToEpisode().toString(), 
-								DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_GOTO_NOT_IN_LAST_ALTERNATE_SOLUTION_STEP_INDICATOR.getFixRecomendation());
-						
-						defects.add(defect)	;	
+
+				if(!alternative.getSolution().isEmpty()) {
+					if(alternative.getSolutionStepWithGoToEpisode() > 0) {
+						//Indicator: The Alternative does not return to the main flow in the last solution step
+						if(!alternative.getSolutionStepWithGoToEpisode().equals(alternative.getSolution().size())) {
+							Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.ALTERNATIVE_ID.getScenarioElement(), alternativeId, 
+									QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
+									DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_GOTO_NOT_IN_LAST_ALTERNATE_SOLUTION_STEP_INDICATOR.getDefectIndicator(), alternative.getRawAlternative(), alternative.getSolutionStepWithGoToEpisode().toString(), 
+									DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_GOTO_NOT_IN_LAST_ALTERNATE_SOLUTION_STEP_INDICATOR.getFixRecomendation());
+
+							defects.add(defect)	;	
+						}
+						//Indicator: The Alternative returns to the main flow using an invalid episode Id/Step
+						if(alternative.getGoToEpisode() == null) {
+							Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.ALTERNATIVE_ID.getScenarioElement(), alternativeId, 
+									QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
+									DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_GOTO_WITHOUT_EPISODE_IN_ALTERNATE_SOLUTION_STEP_INDICATOR.getDefectIndicator(), alternative.getRawAlternative(), alternative.getSolutionStepWithGoToEpisode().toString(), 
+									DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_GOTO_WITHOUT_EPISODE_IN_ALTERNATE_SOLUTION_STEP_INDICATOR.getFixRecomendation());
+
+							defects.add(defect)	;	
+						}
 					}
-					//Indicator: The Alternative returns to the main flow using an invalid episode Id/Step
-					if(alternative.getGoToEpisode() == null) {
-						Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.ALTERNATIVE_ID.getScenarioElement(), alternativeId, 
-								QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
-								DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_GOTO_WITHOUT_EPISODE_IN_ALTERNATE_SOLUTION_STEP_INDICATOR.getDefectIndicator(), alternative.getRawAlternative(), alternative.getSolutionStepWithGoToEpisode().toString(), 
-								DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_GOTO_WITHOUT_EPISODE_IN_ALTERNATE_SOLUTION_STEP_INDICATOR.getFixRecomendation());
-												
-						defects.add(defect)	;	
-					}
-					//Indicator: The Alternative does not finish the scenario in the last solution step
-					if(!alternative.getSolutionStepWithEndScenario().equals(alternative.getSolution().size())) {
-						Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.ALTERNATIVE_ID.getScenarioElement(), alternativeId, 
-								QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
-								DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_END_NOT_IN_LAST_ALTERNATE_SOLUTION_STEP_INDICATOR.getDefectIndicator(), alternative.getRawAlternative(), alternative.getSolutionStepWithEndScenario().toString(), 
-								DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_END_NOT_IN_LAST_ALTERNATE_SOLUTION_STEP_INDICATOR.getFixRecomendation());
-						
-						defects.add(defect)	;	
+					if(alternative.getSolutionStepWithEndScenario() > 0) {
+						//Indicator: The Alternative does not finish the scenario in the last solution step
+						if(!alternative.getSolutionStepWithEndScenario().equals(alternative.getSolution().size())) {
+							Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.ALTERNATIVE_ID.getScenarioElement(), alternativeId, 
+									QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
+									DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_END_NOT_IN_LAST_ALTERNATE_SOLUTION_STEP_INDICATOR.getDefectIndicator(), alternative.getRawAlternative(), alternative.getSolutionStepWithEndScenario().toString(), 
+									DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_END_NOT_IN_LAST_ALTERNATE_SOLUTION_STEP_INDICATOR.getFixRecomendation());
+
+							defects.add(defect)	;	
+						}
 					}
 				}
 				
