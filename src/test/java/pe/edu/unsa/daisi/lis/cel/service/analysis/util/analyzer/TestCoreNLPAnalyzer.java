@@ -823,7 +823,7 @@ public class TestCoreNLPAnalyzer {
 	private static String getWordsAsString(List<CustomToken> tokens) {
 		//Tokens - words
     	int i = 0;
-    	StringBuffer words = new StringBuffer("[");
+    	StringBuilder words = new StringBuilder("[");
     	for(CustomToken token : tokens) {
     		if (i == 0)
     			words.append(token.getWord());
@@ -838,7 +838,7 @@ public class TestCoreNLPAnalyzer {
 	private static String getPosTagsAsString(List<CustomToken> tokens) {
 		//Pos tags
     	int i = 0;
-    	StringBuffer tags = new StringBuffer("[");
+    	StringBuilder tags = new StringBuilder("[");
     	for(CustomToken token : tokens) {
     		if (i == 0)
     			tags.append(token.getPosTag());

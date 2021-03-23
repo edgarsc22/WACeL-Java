@@ -3,8 +3,6 @@ package pe.edu.unsa.daisi.lis.cel.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.util.SystemPropertyUtils;
-
 /* Copyright (c) 2012 Kevin L. Stern
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy

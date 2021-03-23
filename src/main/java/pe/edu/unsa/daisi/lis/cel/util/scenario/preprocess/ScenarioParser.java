@@ -2,7 +2,6 @@ package pe.edu.unsa.daisi.lis.cel.util.scenario.preprocess;
 
 import java.util.ArrayList;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import pe.edu.unsa.daisi.lis.cel.domain.model.scenario.Scenario;
 import pe.edu.unsa.daisi.lis.cel.domain.model.scenario.structured.StructuredAlternative;
@@ -130,7 +129,7 @@ public class ScenarioParser {
 				//SE EPISODIO TEM ID VÁLIDO ENTAO IDENTIFICAR TIPO DE SENTENCA Y RESTRICOES
 				if (episodeId != null && !episodeId.equals(EMPTY_CHAR)) {
 					//CREAR ID DE EPISODIO
-					episodeId = episodeId;
+					
 					//ATUALIZAR EPISODIO | EXCECAO
 					episode = episode.replaceFirst(RegularExpression.REGEX_EPISODE_ID, EMPTY_CHAR);
 					episode = episode.trim();
@@ -758,6 +757,8 @@ public class ScenarioParser {
 					//System or Use Case or Scenario ends or terminates or finishes
 					if(solution.toLowerCase().matches(RegularExpression.REGEX_ALTERNATIVE_ENDS)) {
 						alternative.setScenarioFinish(true);
+						//Set solution step with scenario-ends struct
+					    alternative.setSolutionStepWithEndScenario(solutionStep);
 					}
 				}
 				solutionStep++;
@@ -801,11 +802,12 @@ public class ScenarioParser {
 		int endPreCondSentenceLabel = -1;
 		int startPreCondSentenceItems = -1;
 		int endPreCondSentenceItems = -1;
-		while(matcherPreCondSentence.find()) {
+		//first occurrence
+		if(matcherPreCondSentence.find()) {
 			count++;
 			startPreCondSentenceLabel = matcherPreCondSentence.start();
 			endPreCondSentenceLabel = matcherPreCondSentence.end();
-			break;//firs occurrence
+			
 		}
 
 		if (startPreCondSentenceLabel >= 0 && endPreCondSentenceLabel > 0) {
@@ -813,11 +815,12 @@ public class ScenarioParser {
 			//Find first occurrence of "\. | \n" (end of PreCond. items)
 			
 			Matcher matcherEndPreCondItems = RegularExpression.PATTERN_END_INDICATOR_LIST_ITEMS.matcher(sentencePreCondItems);
-			while(matcherEndPreCondItems.find()) {
+			//first occurrence
+			if(matcherEndPreCondItems.find()) {
 				count++;
 				startPreCondSentenceItems = 0;
 				endPreCondSentenceItems = matcherEndPreCondItems.end();
-				break;//first occurrence
+				
 			}
 			//CRIAR UMA LISTA DE PRE-CONDICOES
 			if(startPreCondSentenceItems >= 0 && endPreCondSentenceItems > 0) {
@@ -885,11 +888,12 @@ public class ScenarioParser {
 		int endPostCondSentenceLabel = -1;
 		int startPostCondSentenceItems = -1;
 		int endPostCondSentenceItems = -1;
-		while(matcherPostCondSentence.find()) {
+		//first occurrence
+		if(matcherPostCondSentence.find()) {
 			count++;
 			startPostCondSentenceLabel = matcherPostCondSentence.start();
 			endPostCondSentenceLabel = matcherPostCondSentence.end();
-			break;//firs occurrence
+			
 		}
 
 		if (startPostCondSentenceLabel >= 0 && endPostCondSentenceLabel > 0) {
@@ -897,11 +901,11 @@ public class ScenarioParser {
 			//Find first occurrence of "\. | \n" (end of PostCond. items)
 			
 			Matcher matcherEndPostCondItems = RegularExpression.PATTERN_END_INDICATOR_LIST_ITEMS.matcher(sentencePostCondItems);
-			while(matcherEndPostCondItems.find()) {
+			if(matcherEndPostCondItems.find()) {
 				count++;
 				startPostCondSentenceItems = 0;
 				endPostCondSentenceItems = matcherEndPostCondItems.end();
-				break;//first occurrence
+				
 			}
 			//CRIAR UMA LISTA DE Post-CONDICOES
 			if(startPostCondSentenceItems >= 0 && endPostCondSentenceItems > 0) {
@@ -967,11 +971,12 @@ public class ScenarioParser {
 		int endConstraintSentenceLabel = -1;
 		int startConstraintSentenceItems = -1;
 		int endConstraintSentenceItems = -1;
-		while(matcherConstraintSentence.find()) {
+		//first occurrence
+		if(matcherConstraintSentence.find()) {
 			count++;
 			startConstraintSentenceLabel = matcherConstraintSentence.start();
 			endConstraintSentenceLabel = matcherConstraintSentence.end();
-			break;//firs occurrence
+			
 		}
 
 		if (startConstraintSentenceLabel >= 0 && endConstraintSentenceLabel > 0) {
@@ -979,11 +984,11 @@ public class ScenarioParser {
 			//Find first occurrence of "\. | \n" (end of Constraint. items)
 			
 			Matcher matcherEndConstraintItems = RegularExpression.PATTERN_END_INDICATOR_LIST_ITEMS.matcher(sentenceConstraintItems);
-			while(matcherEndConstraintItems.find()) {
+			if(matcherEndConstraintItems.find()) {
 				count++;
 				startConstraintSentenceItems = 0;
 				endConstraintSentenceItems = matcherEndConstraintItems.end();
-				break;//first occurrence
+				
 			}
 			//CRIAR UMA LISTA DE Constraints
 			if(startConstraintSentenceItems >= 0 && endConstraintSentenceItems > 0) {
@@ -1042,11 +1047,12 @@ public class ScenarioParser {
 		int endConstraintSentenceLabel = -1;
 		int startConstraintSentenceItems = -1;
 		int endConstraintSentenceItems = -1;
-		while(matcherConstraintSentence.find()) {
+		//first occurrence
+		if(matcherConstraintSentence.find()) {
 			count++;
 			startConstraintSentenceLabel = matcherConstraintSentence.start();
 			endConstraintSentenceLabel = matcherConstraintSentence.end();
-			break;//firs occurrence
+			
 		}
 
 		if (startConstraintSentenceLabel >= 0 && endConstraintSentenceLabel > 0) {
@@ -1054,11 +1060,11 @@ public class ScenarioParser {
 			//Find first occurrence of "\. | \n" (end of Constraint. items)
 			
 			Matcher matcherEndConstraintItems = RegularExpression.PATTERN_END_INDICATOR_LIST_ITEMS.matcher(sentenceConstraintItems);
-			while(matcherEndConstraintItems.find()) {
+			if(matcherEndConstraintItems.find()) {
 				count++;
 				startConstraintSentenceItems = 0;
 				endConstraintSentenceItems = matcherEndConstraintItems.end();
-				break;//first occurrence
+				
 			}
 			//CRIAR UMA LISTA DE Constraints
 			if(startConstraintSentenceItems >= 0 && endConstraintSentenceItems > 0) {
@@ -1108,11 +1114,12 @@ public class ScenarioParser {
 		int endTemporalLocSentenceLabel = -1;
 		int startTemporalLocSentenceItems = -1;
 		int endTemporalLocSentenceItems = -1;
-		while(matcherTemporalLocSentence.find()) {
+		//first occurrence
+		if(matcherTemporalLocSentence.find()) {
 			count++;
 			startTemporalLocSentenceLabel = matcherTemporalLocSentence.start();
 			endTemporalLocSentenceLabel = matcherTemporalLocSentence.end();
-			break;//firs occurrence
+			
 		}
 
 		if (startTemporalLocSentenceLabel >= 0 && endTemporalLocSentenceLabel > 0) {
@@ -1121,11 +1128,11 @@ public class ScenarioParser {
 			//Find first occurrence of "\. | \n" (end of TemporalLoc. items)
 			
 			Matcher matcherEndTemporalLocItems = RegularExpression.PATTERN_END_INDICATOR_LIST_ITEMS.matcher(sentenceTemporalLocItems);
-			while(matcherEndTemporalLocItems.find()) {
+			if(matcherEndTemporalLocItems.find()) {
 				count++;
 				startTemporalLocSentenceItems = 0;
 				endTemporalLocSentenceItems = matcherEndTemporalLocItems.end();
-				break;//first occurrence
+				
 			}
 			//CRIAR UMA LISTA DE Temporal Locations
 			if(startTemporalLocSentenceItems >= 0 && endTemporalLocSentenceItems > 0) {
@@ -1166,11 +1173,12 @@ public class ScenarioParser {
 		int endGeographicalLocSentenceLabel = -1;
 		int startGeographicalLocSentenceItems = -1;
 		int endGeographicalLocSentenceItems = -1;
-		while(matcherGeographicalLocSentence.find()) {
+		//first occurrence
+		if(matcherGeographicalLocSentence.find()) {
 			count++;
 			startGeographicalLocSentenceLabel = matcherGeographicalLocSentence.start();
 			endGeographicalLocSentenceLabel = matcherGeographicalLocSentence.end();
-			break;//firs occurrence
+			
 		}
 
 		if (startGeographicalLocSentenceLabel >= 0 && endGeographicalLocSentenceLabel > 0) {
@@ -1178,11 +1186,11 @@ public class ScenarioParser {
 			//Find first occurrence of "\. | \n" (end of GeographicalLoc. items)
 			
 			Matcher matcherEndGeographicalLocItems = RegularExpression.PATTERN_END_INDICATOR_LIST_ITEMS.matcher(sentenceGeographicalLocItems);
-			while(matcherEndGeographicalLocItems.find()) {
+			if(matcherEndGeographicalLocItems.find()) {
 				count++;
 				startGeographicalLocSentenceItems = 0;
 				endGeographicalLocSentenceItems = matcherEndGeographicalLocItems.end();
-				break;//first occurrence
+				
 			}
 			//CRIAR UMA LISTA DE Geographical Locations
 			if(startGeographicalLocSentenceItems >= 0 && endGeographicalLocSentenceItems > 0) {
@@ -1218,12 +1226,12 @@ public class ScenarioParser {
 		int count = 0;
 		int startIdSentenceLabel = -1;
 		int endIdSentenceLabel = -1;
-
-		while(matcherIdSentence.find()) {
+		//firs occurrence
+		if(matcherIdSentence.find()) {
 			count++;
 			startIdSentenceLabel = matcherIdSentence.start();
 			endIdSentenceLabel = matcherIdSentence.end();
-			break;//firs occurrence
+			
 		}
 		//SE EPISODIO | EXCECAO TEM ID VÁLIDO ENTAO CRIAR ID
 		if (startIdSentenceLabel >= 0 && endIdSentenceLabel > 0) {
@@ -1256,11 +1264,12 @@ public class ScenarioParser {
 		int endStartConditionLabel = -1;
 		int startConditionItems = -1;
 		int endConditionItems = -1;
-		while(matcherStartCondition.find()) {
+		//firs occurrence
+		if(matcherStartCondition.find()) {
 			count++;
 			startStartConditionLabel = matcherStartCondition.start();
 			endStartConditionLabel = matcherStartCondition.end();
-			break;//firs occurrence
+			
 		}
 		//SE episodio CONDITIONAL
 		if (startStartConditionLabel >= 0 && endStartConditionLabel > 0) {
@@ -1268,11 +1277,11 @@ public class ScenarioParser {
 			//Find first occurrence of "THEN" (end of conditions)
 			
 			Matcher matcherStartAction = RegularExpression.PATTERN_START_DELIMITING_CONDITIONAL_EPISODE_ACTION.matcher(sentence);
-			while(matcherStartAction.find()) {
+			if(matcherStartAction.find()) {
 				count++;
 				startConditionItems = 0;
 				endConditionItems = matcherStartAction.start();
-				break;//first occurrence
+				
 			}
 			//SE EXISTE ACTION ENTAO CRIAR EPISODIO CONDICIONAL: ACTION Y UMA LISTA DE CONDICOES: 
 			if(startConditionItems >= 0 && endConditionItems > 0) {
@@ -1318,11 +1327,12 @@ public class ScenarioParser {
 		int endStartConditionLabel = -1;
 		int startConditionItems = -1;
 		int endConditionItems = -1;
-		while(matcherStartCondition.find()) {
+		//firs occurrence
+		if(matcherStartCondition.find()) {
 			count++;
 			startStartConditionLabel = matcherStartCondition.start();
 			endStartConditionLabel = matcherStartCondition.end();
-			break;//firs occurrence
+			
 		}
 		//SE episodio CONDITIONAL
 		if (startStartConditionLabel >= 0 && endStartConditionLabel > 0) {
@@ -1372,11 +1382,12 @@ public class ScenarioParser {
 		int endStartOptionLabel = -1;
 		int startConditionItems = -1;
 		int endConditionItems = -1;
-		while(matcherStartOption.find()) {
+		//firs occurrence
+		if(matcherStartOption.find()) {
 			count++;
 			startStartOptionLabel = matcherStartOption.start();
 			endStartOptionLabel = matcherStartOption.end();
-			break;//firs occurrence
+			
 		}
 		//SE episodio OPTIONAL
 		if (startStartOptionLabel >= 0 && endStartOptionLabel > 0) {
@@ -1385,11 +1396,11 @@ public class ScenarioParser {
 			Matcher matcherEndOption = RegularExpression.PATTERN_END_DELIMITING_OPTIONAL_EPISODE.matcher(sentence);
 			int startEndOptionLabel = -1;
 			int endEndOptionLabel = -1;
-			while(matcherEndOption.find()) {
+			if(matcherEndOption.find()) {
 				count++;
 				startEndOptionLabel = matcherEndOption.start();
 				endEndOptionLabel = matcherEndOption.end();
-				break;//first occurrence
+				
 			}
 			//SE EXISTE [...] ENTAO CRIAR EPISODIO OPCIONAL: ACTION Y UMA LISTA DE CONDICOES: 
 			if(startEndOptionLabel >= 0 && endEndOptionLabel > 0) {
@@ -1428,22 +1439,23 @@ public class ScenarioParser {
 		int endStartLoopLabel = -1;
 		int startLoopConditionItems = -1;
 		int endLoopConditionItems = -1;
-		while(matcherStartLoop.find()) {
+		//firs occurrence
+		if(matcherStartLoop.find()) {
 			count++;
 			startStartLoopLabel = matcherStartLoop.start();
 			endStartLoopLabel = matcherStartLoop.end();
-			break;//firs occurrence
+			
 		}
 		//SE episodio LOOP
 		if (startStartLoopLabel >= 0 && endStartLoopLabel > 0) {
 			//VERIFICAR SE EXISTE: WHILE
 			//Find first occurrence of "WHILE" (end of ACTION)
 			Matcher matcherStartLoopConditions = RegularExpression.PATTERN_START_DELIMITING_ITERATIVE_EPISODE_DO_WHILE_CONDITIONS.matcher(sentence);
-			while(matcherStartLoopConditions.find()) {
+			if(matcherStartLoopConditions.find()) {
 				count++;
 				startLoopConditionItems = matcherStartLoopConditions.end();
 				endLoopConditionItems = sentence.length();
-				break;//first occurrence
+				
 			}
 			//SE EXISTE CONDICOES ENTAO CRIAR EPISODIO DO-WHILE: ACTION Y UMA LISTA DE CONDICOES: 
 			if(startLoopConditionItems >= 0 && endLoopConditionItems > 0) {
@@ -1461,11 +1473,11 @@ public class ScenarioParser {
 				Matcher matcherEndConditionItems = RegularExpression.PATTERN_END_INDICATOR_LIST_ITEMS.matcher(conditions);
 				startLoopConditionItems = -1;
 				endLoopConditionItems = -1;
-				while(matcherEndConditionItems.find()) {
+				if(matcherEndConditionItems.find()) {
 					count++;
 					startLoopConditionItems = 0;
 					endLoopConditionItems = matcherEndConditionItems.end();
-					break;//first occurrence
+					
 				}
 				//CRIAR UMA LISTA DE CONDICOES
 				if(startLoopConditionItems >= 0 && endLoopConditionItems > 0) {
@@ -1504,22 +1516,23 @@ public class ScenarioParser {
 		int endLoopLabel = -1;
 		int startLoopConditionItems = -1;
 		int endLoopConditionItems = -1;
-		while(matcherStartLoop.find()) {
+		//firs occurrence
+		if(matcherStartLoop.find()) {
 			count++;
 			startLoopConditionItems = matcherStartLoop.start();
 			endLoopConditionItems = matcherStartLoop.end();
-			break;//firs occurrence
+			
 		}
 		//SE episodio LOOP
 		if (startLoopConditionItems >= 0 && endLoopConditionItems > 0) {
 			//VERIFICAR SE EXISTE: DO
 			//Find first occurrence of "DO" (end of CONDITIONS)
 			Matcher matcherStartLoopConditions = RegularExpression.PATTERN_START_DELIMITING_ITERATIVE_EPISODE_DO_WHILE_ACTION.matcher(sentence);
-			while(matcherStartLoopConditions.find()) {
+			if(matcherStartLoopConditions.find()) {
 				count++;
 				startLoopLabel = matcherStartLoopConditions.end();
 				endLoopLabel = sentence.length();
-				break;//first occurrence
+				
 			}
 			//SE EXISTE ACTION ENTAO CRIAR EPISODIO WHILE-DO: ACTION Y UMA LISTA DE CONDICOES: 
 			if(startLoopLabel >= 0 && endLoopLabel > 0) {
@@ -1537,11 +1550,11 @@ public class ScenarioParser {
 				Matcher matcherEndConditionItems = RegularExpression.PATTERN_END_INDICATOR_LIST_ITEMS.matcher(conditions);
 				startLoopConditionItems = -1;
 				endLoopConditionItems = -1;
-				while(matcherEndConditionItems.find()) {
+				if(matcherEndConditionItems.find()) {
 					count++;
 					startLoopConditionItems = 0;
 					endLoopConditionItems = matcherEndConditionItems.end();
-					break;//first occurrence
+					
 				}
 				//CRIAR UMA LISTA DE CONDICOES
 				if(startLoopConditionItems >= 0 && endLoopConditionItems > 0) {
@@ -1580,22 +1593,23 @@ public class ScenarioParser {
 		int endLoopLabel = -1;
 		int startLoopConditionItems = -1;
 		int endLoopConditionItems = -1;
-		while(matcherStartLoop.find()) {
+		//firs occurrence
+		if(matcherStartLoop.find()) {
 			count++;
 			startLoopConditionItems = matcherStartLoop.start();
 			endLoopConditionItems = matcherStartLoop.end();
-			break;//firs occurrence
+			
 		}
 		//SE episodio LOOP
 		if (startLoopConditionItems >= 0 && endLoopConditionItems > 0) {
 			//VERIFICAR SE EXISTE: DO
 			//Find first occurrence of "DO" (end of CONDITIONS)
 			Matcher matcherStartLoopConditions = RegularExpression.PATTERN_START_DELIMITING_ITERATIVE_EPISODE_FOREACH_DO_ACTION.matcher(sentence);
-			while(matcherStartLoopConditions.find()) {
+			if(matcherStartLoopConditions.find()) {
 				count++;
 				startLoopLabel = matcherStartLoopConditions.end();
 				endLoopLabel = sentence.length();
-				break;//first occurrence
+				
 			}
 			//SE EXISTE ACTION ENTAO CRIAR EPISODIO FOR-EACH: ACTION Y UMA LISTA DE CONDICOES: 
 			if(startLoopLabel >= 0 && endLoopLabel > 0) {
@@ -1641,23 +1655,24 @@ public class ScenarioParser {
 		int endStartConditionLabel = -1;
 		int startConditionItems = -1;
 		int endConditionItems = -1;
-		while(matcherStartCondition.find()) {
+		//firs occurrence
+		if(matcherStartCondition.find()) {
 			count++;
 			startStartConditionLabel = matcherStartCondition.start();
 			endStartConditionLabel = matcherStartCondition.end();
-			break;//firs occurrence
+			
 		}
 		//SE CAUSAS
 		if (startStartConditionLabel >= 0 && endStartConditionLabel > 0) {
 			//VERIFICAR SE EXISTE: THEN
-			//Find first occurrence of "THEN" (end of CAUSAS)
+			//Find first occurrence of "THEN" (end of CAUSES)
 			
 			Matcher matcherStartAction = RegularExpression.PATTERN_START_DELIMITING_CONDITIONAL_EPISODE_ACTION.matcher(sentence);
-			while(matcherStartAction.find()) {
+			if(matcherStartAction.find()) {
 				count++;
 				startConditionItems = 0;
 				endConditionItems = matcherStartAction.start();
-				break;//first occurrence
+				
 			}
 			//SE EXISTE SOLUTION ENTAO CRIAR EXCECAO: SOLUTION Y UMA LISTA DE CAUSAS: 
 			if(startConditionItems >= 0 && endConditionItems > 0) {

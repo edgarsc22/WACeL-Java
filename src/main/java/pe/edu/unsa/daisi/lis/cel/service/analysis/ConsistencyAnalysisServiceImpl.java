@@ -1,6 +1,7 @@
 package pe.edu.unsa.daisi.lis.cel.service.analysis;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -11,15 +12,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import pe.edu.unsa.daisi.lis.cel.domain.factory.NewDefect;
 import pe.edu.unsa.daisi.lis.cel.domain.model.analysis.Defect;
 import pe.edu.unsa.daisi.lis.cel.domain.model.analysis.DefectCategoryEnum;
 import pe.edu.unsa.daisi.lis.cel.domain.model.analysis.DefectIndicatorEnum;
 import pe.edu.unsa.daisi.lis.cel.domain.model.analysis.QualityPropertyEnum;
 import pe.edu.unsa.daisi.lis.cel.domain.model.analysis.ScenarioElement;
 import pe.edu.unsa.daisi.lis.cel.domain.model.petrinet.PetriNet;
+import pe.edu.unsa.daisi.lis.cel.domain.model.scenario.structured.StructuredAlternative;
 import pe.edu.unsa.daisi.lis.cel.domain.model.scenario.structured.StructuredContext;
 import pe.edu.unsa.daisi.lis.cel.domain.model.scenario.structured.StructuredEpisode;
-import pe.edu.unsa.daisi.lis.cel.domain.model.scenario.structured.StructuredAlternative;
 import pe.edu.unsa.daisi.lis.cel.domain.model.scenario.structured.StructuredScenario;
 import pe.edu.unsa.daisi.lis.cel.service.IPetriNetService;
 import pe.edu.unsa.daisi.lis.cel.service.PetriNetServiceImpl;
@@ -49,17 +51,13 @@ public class ConsistencyAnalysisServiceImpl implements IConsistencyAnalysisServi
 		//indicator: Petri-Net with simultaneously enabled operations
 		if(pnAnalysisresult.contains("<br/><b>Simultaneously enabled transitions:</b>") ) {
 			String enabledTransitions = StringUtils.substringBetween(pnAnalysisresult, "<br/><b>Simultaneously enabled transitions:</b>", "</ul>");
-			Defect defect = new Defect();
-			defect.setQualityProperty(QualityPropertyEnum.NON_INTERFERENTIAL.getQualityProperty());
-			defect.setScenarioId(mainScenario.getId());
-			defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
-			defect.setIndicator(DefectIndicatorEnum.NON_INTERFERENTIAL_SIMULTANEOUS_ENABLED_OPERATIONS_INDICATOR.getDefectIndicator());
-			if(enabledTransitions != null)
-				defect.setIndicator(defect.getIndicator().replace("<indicator>", enabledTransitions));
-			else
-				defect.setIndicator(defect.getIndicator().replace("<indicator>", pnAnalysisresult));
-			defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-			defect.setFixRecomendation(DefectIndicatorEnum.NON_INTERFERENTIAL_SIMULTANEOUS_ENABLED_OPERATIONS_INDICATOR.getFixRecomendation());
+			
+			Defect defect = NewDefect.buildDefect(mainScenario.getId(), ScenarioElement.TITLE.getScenarioElement(), null, 
+					QualityPropertyEnum.NON_INTERFERENTIAL.getQualityProperty(), 
+					DefectIndicatorEnum.NON_INTERFERENTIAL_SIMULTANEOUS_ENABLED_OPERATIONS_INDICATOR.getDefectIndicator(), null, 
+					enabledTransitions != null? enabledTransitions: pnAnalysisresult, 
+					DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.NON_INTERFERENTIAL_SIMULTANEOUS_ENABLED_OPERATIONS_INDICATOR.getFixRecomendation());
+						
 			defects.add(defect);
 
 		}
@@ -69,28 +67,22 @@ public class ConsistencyAnalysisServiceImpl implements IConsistencyAnalysisServi
 		if(pnAnalysisresult.contains("<b>Bounded:</b> false")) {
 			String boundedPlaces = StringUtils.substringBetween(pnAnalysisresult, "<br/><b>Places to overflow: </b>", "<br/>");
 			bounded = false;
-			Defect defect = new Defect();
-			defect.setQualityProperty(QualityPropertyEnum.BOUNDEDNESS.getQualityProperty());
-			defect.setScenarioId(mainScenario.getId());
-			defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
-			defect.setIndicator(DefectIndicatorEnum.BOUNDEDNESS_RESOURCE_OVERFLOW_INDICATOR.getDefectIndicator());
-			defect.setIndicator(defect.getIndicator().replace("<indicator>", boundedPlaces));
-			defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-			defect.setFixRecomendation(DefectIndicatorEnum.BOUNDEDNESS_RESOURCE_OVERFLOW_INDICATOR.getFixRecomendation());
+			Defect defect = NewDefect.buildDefect(mainScenario.getId(), ScenarioElement.TITLE.getScenarioElement(), null, 
+					QualityPropertyEnum.BOUNDEDNESS.getQualityProperty(), 
+					DefectIndicatorEnum.BOUNDEDNESS_RESOURCE_OVERFLOW_INDICATOR.getDefectIndicator(), null, boundedPlaces,
+					DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.BOUNDEDNESS_RESOURCE_OVERFLOW_INDICATOR.getFixRecomendation());
+									
 			defects.add(defect);
 
 		} else {
 			//indicator: Petri-Net is not safe, i.e, It is not 1-bounded
 			if(pnAnalysisresult.contains("<b>Safe: </b>false")) {
 				safe = false;
-				Defect defect = new Defect();
-				defect.setQualityProperty(QualityPropertyEnum.SAFENESS.getQualityProperty());
-				defect.setScenarioId(mainScenario.getId());
-				defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
-				defect.setIndicator(DefectIndicatorEnum.BOUNDEDNESS_PETRI_NET_NOT_SAFE.getDefectIndicator());
-				defect.setIndicator(defect.getIndicator().replace("<indicator>", "<b>Safe: </b>false"));
-				defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-				defect.setFixRecomendation(DefectIndicatorEnum.BOUNDEDNESS_PETRI_NET_NOT_SAFE.getFixRecomendation());
+				Defect defect = NewDefect.buildDefect(mainScenario.getId(), ScenarioElement.TITLE.getScenarioElement(), null, 
+						QualityPropertyEnum.SAFENESS.getQualityProperty(), 
+						DefectIndicatorEnum.BOUNDEDNESS_PETRI_NET_NOT_SAFE.getDefectIndicator(), null, "<b>Safe: </b>false",
+						DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.BOUNDEDNESS_PETRI_NET_NOT_SAFE.getFixRecomendation());
+				
 				defects.add(defect);
 				
 			}
@@ -102,15 +94,11 @@ public class ConsistencyAnalysisServiceImpl implements IConsistencyAnalysisServi
 			live = false;
 			//deadlock
 			String deadlockTransitions = StringUtils.substringBetween(pnAnalysisresult, "<br/><b>Shortest path to deadlock: </b>", "<br/><br/>");
+			Defect defect = NewDefect.buildDefect(mainScenario.getId(), ScenarioElement.TITLE.getScenarioElement(), null, 
+					QualityPropertyEnum.LIVENESS.getQualityProperty(), 
+					DefectIndicatorEnum.LIVENESS_DEADLOCK_INDICATOR.getDefectIndicator(), null, deadlockTransitions,
+					DefectCategoryEnum.INFO.getDefectCategory(), DefectIndicatorEnum.LIVENESS_DEADLOCK_INDICATOR.getFixRecomendation());
 			
-			Defect defect = new Defect();
-			defect.setQualityProperty(QualityPropertyEnum.LIVENESS.getQualityProperty());
-			defect.setScenarioId(mainScenario.getId());
-			defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
-			defect.setIndicator(DefectIndicatorEnum.LIVENESS_DEADLOCK_INDICATOR.getDefectIndicator());
-			defect.setIndicator(defect.getIndicator().replace("<indicator>", deadlockTransitions));
-			defect.setDefectCategory(DefectCategoryEnum.INFO.getDefectCategory());
-			defect.setFixRecomendation(DefectIndicatorEnum.LIVENESS_DEADLOCK_INDICATOR.getFixRecomendation());
 			defects.add(defect);
 			
 		}
@@ -121,29 +109,22 @@ public class ConsistencyAnalysisServiceImpl implements IConsistencyAnalysisServi
 			live = false;
 			//never enabled
 			String neverEnabledTransitions = StringUtils.substringBetween(pnAnalysisresult, "<br/><b>Never enabled transitions:</b>", "<br/><br/>");
+			Defect defect = NewDefect.buildDefect(mainScenario.getId(), ScenarioElement.TITLE.getScenarioElement(), null, 
+					QualityPropertyEnum.LIVENESS.getQualityProperty(), 
+					DefectIndicatorEnum.LIVENESS_NEVER_ENABLED_OPERATIONS_INDICATOR.getDefectIndicator(), null, neverEnabledTransitions,
+					DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.LIVENESS_NEVER_ENABLED_OPERATIONS_INDICATOR.getFixRecomendation());
 			
-			Defect defect = new Defect();
-			defect.setQualityProperty(QualityPropertyEnum.LIVENESS.getQualityProperty());
-			defect.setScenarioId(mainScenario.getId());
-			defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
-			defect.setIndicator(DefectIndicatorEnum.LIVENESS_NEVER_ENABLED_OPERATIONS_INDICATOR.getDefectIndicator());
-			defect.setIndicator(defect.getIndicator().replace("<indicator>", neverEnabledTransitions));
-			defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-			defect.setFixRecomendation(DefectIndicatorEnum.LIVENESS_NEVER_ENABLED_OPERATIONS_INDICATOR.getFixRecomendation());
 			defects.add(defect);
 		}
 		
 		//Episode 7: Check Reversibility: If the executable model is not reversible, the automatic error recovery is not possible [3].
 		//Indicator: There are no a path from an operation to the initial state of the Petri-Net, i.e, Petri-Net is not bounded, not safe and not live
 		if(!bounded && !safe && !live) {
-			Defect defect = new Defect();
-			defect.setQualityProperty(QualityPropertyEnum.REVERSIBILITY.getQualityProperty());
-			defect.setScenarioId(mainScenario.getId());
-			defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
-			defect.setIndicator(DefectIndicatorEnum.REVERSIBILITY_NO_PATH_TO_INITIAL_STATE_INDICATOR.getDefectIndicator());
-			//defect.setIndicator(defect.getIndicator().replace("<indicator>", neverEnabledTransitions));
-			defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-			defect.setFixRecomendation(DefectIndicatorEnum.REVERSIBILITY_NO_PATH_TO_INITIAL_STATE_INDICATOR.getFixRecomendation());
+			Defect defect = NewDefect.buildDefect(mainScenario.getId(), ScenarioElement.TITLE.getScenarioElement(), null, 
+					QualityPropertyEnum.REVERSIBILITY.getQualityProperty(), 
+					DefectIndicatorEnum.REVERSIBILITY_NO_PATH_TO_INITIAL_STATE_INDICATOR.getDefectIndicator(), null, null,
+					DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.REVERSIBILITY_NO_PATH_TO_INITIAL_STATE_INDICATOR.getFixRecomendation());
+						
 			defects.add(defect);
 		}
 		return defects;

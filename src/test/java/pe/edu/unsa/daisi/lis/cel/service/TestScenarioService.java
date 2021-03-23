@@ -58,7 +58,7 @@ public class TestScenarioService {
 		structuredScenario = service.convertToStructuredScenario(scenario) ;
 		
 		String texto = "$##ASJAJDHAKJDAHDK)_+,..";
-		System.out.println(texto.replaceFirst("(^(\\p{Punct})*|(\\p{Punct})*$)", "---"));
+		System.out.println(texto.replaceFirst("(^(\\p{Punct})* | (\\p{Punct})*$)", "---"));
 		String episode = "# askldjsalkdlkas #" ;
 				System.out.println((episode.substring(0, episode.length() - 1 )));
 	}

@@ -1,12 +1,14 @@
 package pe.edu.unsa.daisi.lis.cel.service.analysis;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import pe.edu.unsa.daisi.lis.cel.domain.factory.NewDefect;
 import pe.edu.unsa.daisi.lis.cel.domain.model.analysis.Defect;
 import pe.edu.unsa.daisi.lis.cel.domain.model.analysis.DefectCategoryEnum;
 import pe.edu.unsa.daisi.lis.cel.domain.model.analysis.DefectIndicatorEnum;
@@ -19,10 +21,8 @@ import pe.edu.unsa.daisi.lis.cel.util.DamerauLevenshteinAlgorithm;
 import pe.edu.unsa.daisi.lis.cel.util.ListManipulation;
 import pe.edu.unsa.daisi.lis.cel.util.RegularExpression;
 import pe.edu.unsa.daisi.lis.cel.util.StringManipulation;
-import pe.edu.unsa.daisi.lis.cel.util.nlp.CoreNLPAnalyzer;
 import pe.edu.unsa.daisi.lis.cel.util.nlp.CustomSentenceNlpInfo;
 import pe.edu.unsa.daisi.lis.cel.util.nlp.CustomToken;
-import pe.edu.unsa.daisi.lis.cel.util.nlp.INLPAnalyzer;
 import pe.edu.unsa.daisi.lis.cel.util.nlp.PosTagEnum;
 import pe.edu.unsa.daisi.lis.cel.util.nlp.dictionary.english.Unambiguity;
 import pe.edu.unsa.daisi.lis.cel.util.scenario.preprocess.ScenarioAnnotation;
@@ -55,15 +55,11 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 				//Indicator: The title contains more than one action-verb, subject or object
 				for (CustomToken token : titleNlp.getTokens()) {
 					if(token.getWord().equals(indicator)) {
-						Defect defect = new Defect(); 
-						defect.setQualityProperty(QualityPropertyEnum.ATOMICITY.getQualityProperty());
-						defect.setScenarioId(structuredScenario.getId());
-						defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
-						defect.setIndicator(DefectIndicatorEnum.ATOMICITY_TITLE_MULTIPLE_SITUATION_INDICATOR.getDefectIndicator());
-						defect.setIndicator(defect.getIndicator().replace("<sentence>", structuredScenario.getTitle()));
-						defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
-						defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-						defect.setFixRecomendation(DefectIndicatorEnum.ATOMICITY_TITLE_MULTIPLE_SITUATION_INDICATOR.getFixRecomendation());
+						Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.TITLE.getScenarioElement(), null, 
+								QualityPropertyEnum.ATOMICITY.getQualityProperty(), 
+								DefectIndicatorEnum.ATOMICITY_TITLE_MULTIPLE_SITUATION_INDICATOR.getDefectIndicator(), structuredScenario.getTitle(), indicator, 
+								DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.ATOMICITY_TITLE_MULTIPLE_SITUATION_INDICATOR.getFixRecomendation());	
+						
 						defects.add(defect)	;
 						break;
 					}
@@ -84,69 +80,49 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 			
 			//Indicator: Unnecessary Subjects in the title
 			if(titleNlp.getSubjects() != null && !titleNlp.getSubjects().isEmpty()) {
-				Defect defect = new Defect(); 
-				defect.setQualityProperty(QualityPropertyEnum.ATOMICITY.getQualityProperty());
-				defect.setScenarioId(structuredScenario.getId());
-				defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
-				defect.setIndicator(DefectIndicatorEnum.ATOMICITY_TITLE_UNNECESSARY_SUBJECT_INDICATOR.getDefectIndicator());
-				defect.setIndicator(defect.getIndicator().replace("<sentence>", structuredScenario.getTitle()));
-				defect.setIndicator(defect.getIndicator().replace("<indicator>", titleNlp.getSubjectsAsString()));
-				defect.setDefectCategory(DefectCategoryEnum.INFO.getDefectCategory());
-				defect.setFixRecomendation(DefectIndicatorEnum.ATOMICITY_TITLE_UNNECESSARY_SUBJECT_INDICATOR.getFixRecomendation());
+				Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.TITLE.getScenarioElement(), null, 
+						QualityPropertyEnum.ATOMICITY.getQualityProperty(), 
+						DefectIndicatorEnum.ATOMICITY_TITLE_UNNECESSARY_SUBJECT_INDICATOR.getDefectIndicator(), structuredScenario.getTitle(), titleNlp.getSubjectsAsString(), 
+						DefectCategoryEnum.INFO.getDefectCategory(), DefectIndicatorEnum.ATOMICITY_TITLE_UNNECESSARY_SUBJECT_INDICATOR.getFixRecomendation());	
+			
 				defects.add(defect)	;
 			}
 			//Indicator: Missing Object in the title
 			if((titleNlp.getDirectObjects() == null || titleNlp.getDirectObjects().isEmpty())
 					&& (titleNlp.getIndirectObjects() == null || titleNlp.getIndirectObjects().isEmpty())) {//OK?
-				Defect defect = new Defect(); 
-				defect.setQualityProperty(QualityPropertyEnum.ATOMICITY.getQualityProperty());
-				defect.setScenarioId(structuredScenario.getId());
-				defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
-				defect.setIndicator(DefectIndicatorEnum.ATOMICITY_TITLE_MISSING_OBJECT_INDICATOR.getDefectIndicator());
-				defect.setIndicator(defect.getIndicator().replace("<sentence>", structuredScenario.getTitle()));
-				//defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
-				defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-				defect.setFixRecomendation(DefectIndicatorEnum.ATOMICITY_TITLE_MISSING_OBJECT_INDICATOR.getFixRecomendation());
+				Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.TITLE.getScenarioElement(), null, 
+						QualityPropertyEnum.ATOMICITY.getQualityProperty(), 
+						DefectIndicatorEnum.ATOMICITY_TITLE_MISSING_OBJECT_INDICATOR.getDefectIndicator(), structuredScenario.getTitle(), null, 
+						DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.ATOMICITY_TITLE_MISSING_OBJECT_INDICATOR.getFixRecomendation());	
+				
 				defects.add(defect)	;
 			}
 			//Indicator: Missing Action-Verb in the title
 			if(titleNlp.getMainActionVerbs() == null || titleNlp.getMainActionVerbs().isEmpty()) {
-				Defect defect = new Defect(); 
-				defect.setQualityProperty(QualityPropertyEnum.ATOMICITY.getQualityProperty());
-				defect.setScenarioId(structuredScenario.getId());
-				defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
-				defect.setIndicator(DefectIndicatorEnum.ATOMICITY_TITLE_MISSING_ACTION_VERB_INDICATOR.getDefectIndicator());
-				defect.setIndicator(defect.getIndicator().replace("<sentence>", structuredScenario.getTitle()));
-				//defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
-				defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-				defect.setFixRecomendation(DefectIndicatorEnum.ATOMICITY_TITLE_MISSING_ACTION_VERB_INDICATOR.getFixRecomendation());
+				Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.TITLE.getScenarioElement(), null, 
+						QualityPropertyEnum.ATOMICITY.getQualityProperty(), 
+						DefectIndicatorEnum.ATOMICITY_TITLE_MISSING_ACTION_VERB_INDICATOR.getDefectIndicator(), structuredScenario.getTitle(), null, 
+						DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.ATOMICITY_TITLE_MISSING_ACTION_VERB_INDICATOR.getFixRecomendation());	
+								
 				defects.add(defect)	;
 			} else {
 				//Indicator: The title contains more than one Action-Verb
 				if(titleNlp.getMainActionVerbs().entrySet().size() > 1) {
-					Defect defect = new Defect(); 
-					defect.setQualityProperty(QualityPropertyEnum.ATOMICITY.getQualityProperty());
-					defect.setScenarioId(structuredScenario.getId());
-					defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
-					defect.setIndicator(DefectIndicatorEnum.ATOMICITY_TITLE_MORE_THAN_ONE_ACTION_VERB_INDICATOR.getDefectIndicator());
-					defect.setIndicator(defect.getIndicator().replace("<sentence>", structuredScenario.getTitle()));
-					defect.setIndicator(defect.getIndicator().replace("<indicator>", titleNlp.getMainActionVerbsAsString()));
-					defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-					defect.setFixRecomendation(DefectIndicatorEnum.ATOMICITY_TITLE_MORE_THAN_ONE_ACTION_VERB_INDICATOR.getFixRecomendation());
+					Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.TITLE.getScenarioElement(), null, 
+							QualityPropertyEnum.ATOMICITY.getQualityProperty(), 
+							DefectIndicatorEnum.ATOMICITY_TITLE_MORE_THAN_ONE_ACTION_VERB_INDICATOR.getDefectIndicator(), structuredScenario.getTitle(), titleNlp.getMainActionVerbsAsString(), 
+							DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.ATOMICITY_TITLE_MORE_THAN_ONE_ACTION_VERB_INDICATOR.getFixRecomendation());	
+					
 					defects.add(defect)	;
 				}
 				//Indicator: Action-Verb in the title is not in INFINITIVE (base) FORM
 				for (Map.Entry<Integer, CustomToken> entry : titleNlp.getMainActionVerbs().entrySet()) {
 		 		    if(!entry.getValue().getPosTag().equals(PosTagEnum.VB.name()) && !entry.getValue().getPosTag().equals(PosTagEnum.VBP.name())) {
-		 		    	Defect defect = new Defect(); 
-						defect.setQualityProperty(QualityPropertyEnum.ATOMICITY.getQualityProperty());
-						defect.setScenarioId(structuredScenario.getId());
-						defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
-						defect.setIndicator(DefectIndicatorEnum.ATOMICITY_TITLE_ACTION_VERB_NOT_IN_INFINITIVE_FORM_INDICATOR.getDefectIndicator());
-						defect.setIndicator(defect.getIndicator().replace("<sentence>", structuredScenario.getTitle()));
-						defect.setIndicator(defect.getIndicator().replace("<indicator>", entry.getValue().getWord()));
-						defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-						defect.setFixRecomendation(DefectIndicatorEnum.ATOMICITY_TITLE_ACTION_VERB_NOT_IN_INFINITIVE_FORM_INDICATOR.getFixRecomendation());
+		 		    	Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.TITLE.getScenarioElement(), null, 
+								QualityPropertyEnum.ATOMICITY.getQualityProperty(), 
+								DefectIndicatorEnum.ATOMICITY_TITLE_ACTION_VERB_NOT_IN_INFINITIVE_FORM_INDICATOR.getDefectIndicator(), structuredScenario.getTitle(), entry.getValue().getWord(), 
+								DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.ATOMICITY_TITLE_ACTION_VERB_NOT_IN_INFINITIVE_FORM_INDICATOR.getFixRecomendation());	
+								 		    	
 						defects.add(defect)	;
 		 		    	break;
 		 		    }
@@ -179,15 +155,11 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 				if(episodeNlpInfo != null) {
 					//Indicator: The episode sentence contains more than one Sentence
 					if(episodeNlpInfo.getNumSentences() > 1) {
-						Defect defect = new Defect(); 
-						defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
-						defect.setScenarioId(structuredScenario.getId());
-						defect.setScenarioElement(ScenarioElement.EPISODE_SENTENCE.getScenarioElement());
-						defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeId));
-						defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_EPISODE_MORE_THAN_ONE_SENTENCE_INDICATOR.getDefectIndicator());
-						defect.setIndicator(defect.getIndicator().replace("<sentence>", episode.getSentence()));
-						defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-						defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_EPISODE_MORE_THAN_ONE_SENTENCE_INDICATOR.getFixRecomendation());
+						Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.EPISODE_SENTENCE.getScenarioElement(), episodeId, 
+								QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
+								DefectIndicatorEnum.SIMPLICITY_EPISODE_MORE_THAN_ONE_SENTENCE_INDICATOR.getDefectIndicator(), episode.getSentence(), null, 
+								DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_EPISODE_MORE_THAN_ONE_SENTENCE_INDICATOR.getFixRecomendation());	
+						
 						defects.add(defect)	;
 					}
 					//Check that sentence reference to another scenario (sub-scenario)
@@ -200,32 +172,22 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 					
 					//Indicator: The episode sentence contains more than one Subject
 					if(episodeNlpInfo.getSubjects() != null && !episodeNlpInfo.getSubjects().isEmpty() && episodeNlpInfo.getSubjects().size() > 1) {
-						Defect defect = new Defect(); 
-						defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
-						defect.setScenarioId(structuredScenario.getId());
-						defect.setScenarioElement(ScenarioElement.EPISODE_SENTENCE.getScenarioElement());
-						defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeId));
-						defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_EPISODE_MORE_THAN_ONE_SUBJECT_INDICATOR.getDefectIndicator());
-						defect.setIndicator(defect.getIndicator().replace("<sentence>", episode.getSentence()));
-						defect.setIndicator(defect.getIndicator().replace("<indicator>", episodeNlpInfo.getSubjectsAsString()));
-						defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-						defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_EPISODE_MORE_THAN_ONE_SUBJECT_INDICATOR.getFixRecomendation());
+						Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.EPISODE_SENTENCE.getScenarioElement(), episodeId, 
+								QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
+								DefectIndicatorEnum.SIMPLICITY_EPISODE_MORE_THAN_ONE_SUBJECT_INDICATOR.getDefectIndicator(), episode.getSentence(), episodeNlpInfo.getSubjectsAsString(), 
+								DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_EPISODE_MORE_THAN_ONE_SUBJECT_INDICATOR.getFixRecomendation());
+												
 						defects.add(defect)	;
 						
 					} else {
 					//IF Episode-Sentence does not reference another scenario THEN Check Missing Subject
 						//Indicator: Missing Subject in the episode sentence
 						if(!referenceSubscenario && (episodeNlpInfo.getSubjects() == null || episodeNlpInfo.getSubjects().isEmpty())) {
-							Defect defect = new Defect(); 
-							defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
-							defect.setScenarioId(structuredScenario.getId());
-							defect.setScenarioElement(ScenarioElement.EPISODE_SENTENCE.getScenarioElement());
-							defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeId));
-							defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_EPISODE_MISSING_SUBJECT_INDICATOR.getDefectIndicator());
-							defect.setIndicator(defect.getIndicator().replace("<sentence>", episode.getSentence()));
-							//defect.setIndicator(defect.getIndicator().replace("<indicator>", sentenceComponents.getSubjectsAsString()));
-							defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-							defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_EPISODE_MISSING_SUBJECT_INDICATOR.getFixRecomendation());
+							Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.EPISODE_SENTENCE.getScenarioElement(), episodeId, 
+									QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
+									DefectIndicatorEnum.SIMPLICITY_EPISODE_MISSING_SUBJECT_INDICATOR.getDefectIndicator(), episode.getSentence(), null, 
+									DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_EPISODE_MISSING_SUBJECT_INDICATOR.getFixRecomendation());
+														
 							defects.add(defect)	;
 						}
 					}
@@ -243,46 +205,31 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 			 		    	}
 						}
 						if(!isSystemActor) {
-							Defect defect = new Defect(); 
-							defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
-							defect.setScenarioId(structuredScenario.getId());
-							defect.setScenarioElement(ScenarioElement.EPISODE_SENTENCE.getScenarioElement());
-							defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeId));
-							defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_EPISODE_MISSING_OBJECT_INDICATOR.getDefectIndicator());
-							defect.setIndicator(defect.getIndicator().replace("<sentence>", episode.getSentence()));
-							//defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
-							defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-							defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_EPISODE_MISSING_OBJECT_INDICATOR.getFixRecomendation());
+							Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.EPISODE_SENTENCE.getScenarioElement(), episodeId, 
+									QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
+									DefectIndicatorEnum.SIMPLICITY_EPISODE_MISSING_OBJECT_INDICATOR.getDefectIndicator(), episode.getSentence(), null, 
+									DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_EPISODE_MISSING_OBJECT_INDICATOR.getFixRecomendation());
+							
 							defects.add(defect)	;
 						}
 					} 
 					//Indicator: Missing Action-Verb in the episode sentence
 					if(episodeNlpInfo.getMainActionVerbs() == null || episodeNlpInfo.getMainActionVerbs().isEmpty()) {
-						Defect defect = new Defect(); 
-						defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
-						defect.setScenarioId(structuredScenario.getId());
-						defect.setScenarioElement(ScenarioElement.EPISODE_SENTENCE.getScenarioElement());
-						defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeId));
-						defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_EPISODE_MISSING_ACTION_VERB_INDICATOR.getDefectIndicator());
-						defect.setIndicator(defect.getIndicator().replace("<sentence>", episode.getSentence()));
-						//defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
-						defect.setDefectCategory(DefectCategoryEnum.ERROR.getDefectCategory());
-						defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_EPISODE_MISSING_ACTION_VERB_INDICATOR.getFixRecomendation());
+						Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.EPISODE_SENTENCE.getScenarioElement(), episodeId, 
+								QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
+								DefectIndicatorEnum.SIMPLICITY_EPISODE_MISSING_ACTION_VERB_INDICATOR.getDefectIndicator(), episode.getSentence(), null, 
+								DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_EPISODE_MISSING_ACTION_VERB_INDICATOR.getFixRecomendation());
+											
 						defects.add(defect)	;
 					} else {
 												
 						//Indicator: The episode sentence contains more than one Action-Verb
 						if(episodeNlpInfo.getMainActionVerbs().entrySet().size() > 1) {
-							Defect defect = new Defect(); 
-							defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
-							defect.setScenarioId(structuredScenario.getId());
-							defect.setScenarioElement(ScenarioElement.EPISODE_SENTENCE.getScenarioElement());
-							defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeId));
-							defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_EPISODE_MORE_THAN_ONE_ACTION_VERB_INDICATOR.getDefectIndicator());
-							defect.setIndicator(defect.getIndicator().replace("<sentence>", episode.getSentence()));
-							defect.setIndicator(defect.getIndicator().replace("<indicator>", episodeNlpInfo.getMainActionVerbsAsString()));
-							defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-							defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_EPISODE_MORE_THAN_ONE_ACTION_VERB_INDICATOR.getFixRecomendation());
+							Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.EPISODE_SENTENCE.getScenarioElement(), episodeId, 
+									QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
+									DefectIndicatorEnum.SIMPLICITY_EPISODE_MORE_THAN_ONE_ACTION_VERB_INDICATOR.getDefectIndicator(), episode.getSentence(), episodeNlpInfo.getMainActionVerbsAsString(), 
+									DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_EPISODE_MORE_THAN_ONE_ACTION_VERB_INDICATOR.getFixRecomendation());
+														
 							defects.add(defect)	;
 							
 						}
@@ -292,16 +239,11 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 							//Indicator: The episode sentence contains an Action-verb not in the third form or infinitive form (when reference to other scenario)
 							if(!referenceSubscenario) {
 								if(!entry.getValue().getPosTag().equals(PosTagEnum.VBZ.name())) {
-									Defect defect = new Defect(); 
-									defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
-									defect.setScenarioId(structuredScenario.getId());
-									defect.setScenarioElement(ScenarioElement.EPISODE_SENTENCE.getScenarioElement());
-									defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeId));
-									defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_EPISODE_ACTION_VERB_NOT_IN_THIRD_FORM_INDICATOR.getDefectIndicator());
-									defect.setIndicator(defect.getIndicator().replace("<sentence>", episode.getSentence()));
-									defect.setIndicator(defect.getIndicator().replace("<indicator>", entry.getValue().getWord()));
-									defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-									defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_EPISODE_ACTION_VERB_NOT_IN_THIRD_FORM_INDICATOR.getFixRecomendation());
+									Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.EPISODE_SENTENCE.getScenarioElement(), episodeId, 
+											QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
+											DefectIndicatorEnum.SIMPLICITY_EPISODE_ACTION_VERB_NOT_IN_THIRD_FORM_INDICATOR.getDefectIndicator(), episode.getSentence(), entry.getValue().getWord(), 
+											DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_EPISODE_ACTION_VERB_NOT_IN_THIRD_FORM_INDICATOR.getFixRecomendation());
+									
 									defects.add(defect)	;
 									break;
 								}
@@ -314,32 +256,22 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 						
 						//Indicator: The episode sentence contains more than one Complement-Action-Verb
 						if(episodeNlpInfo.getComplementActionVerbs().entrySet().size() > 1) {
-							Defect defect = new Defect(); 
-							defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
-							defect.setScenarioId(structuredScenario.getId());
-							defect.setScenarioElement(ScenarioElement.EPISODE_SENTENCE.getScenarioElement());
-							defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeId));
-							defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_EPISODE_MORE_THAN_ONE_COMPLEMENT_ACTION_VERB_INDICATOR.getDefectIndicator());
-							defect.setIndicator(defect.getIndicator().replace("<sentence>", episode.getSentence()));
-							defect.setIndicator(defect.getIndicator().replace("<indicator>", episodeNlpInfo.getComplementActionVerbsAsString()));
-							defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-							defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_EPISODE_MORE_THAN_ONE_COMPLEMENT_ACTION_VERB_INDICATOR.getFixRecomendation());
+							Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.EPISODE_SENTENCE.getScenarioElement(), episodeId, 
+									QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
+									DefectIndicatorEnum.SIMPLICITY_EPISODE_MORE_THAN_ONE_COMPLEMENT_ACTION_VERB_INDICATOR.getDefectIndicator(), episode.getSentence(), episodeNlpInfo.getComplementActionVerbsAsString(), 
+									DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_EPISODE_MORE_THAN_ONE_COMPLEMENT_ACTION_VERB_INDICATOR.getFixRecomendation());
+						
 							defects.add(defect)	;
 							
 						}
 						
 						//Indicator: The episode sentence contains more than one Modifier-Action-Verb
 						if(episodeNlpInfo.getModifierActionVerbs().entrySet().size() > 1) {
-							Defect defect = new Defect(); 
-							defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
-							defect.setScenarioId(structuredScenario.getId());
-							defect.setScenarioElement(ScenarioElement.EPISODE_SENTENCE.getScenarioElement());
-							defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeId));
-							defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_EPISODE_MORE_THAN_ONE_MODIFIER_ACTION_VERB_INDICATOR.getDefectIndicator());
-							defect.setIndicator(defect.getIndicator().replace("<sentence>", episode.getSentence()));
-							defect.setIndicator(defect.getIndicator().replace("<indicator>", episodeNlpInfo.getModifierActionVerbsAsString()));
-							defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-							defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_EPISODE_MORE_THAN_ONE_MODIFIER_ACTION_VERB_INDICATOR.getFixRecomendation());
+							Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.EPISODE_SENTENCE.getScenarioElement(), episodeId, 
+									QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
+									DefectIndicatorEnum.SIMPLICITY_EPISODE_MORE_THAN_ONE_MODIFIER_ACTION_VERB_INDICATOR.getDefectIndicator(), episode.getSentence(), episodeNlpInfo.getModifierActionVerbsAsString(), 
+									DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_EPISODE_MORE_THAN_ONE_MODIFIER_ACTION_VERB_INDICATOR.getFixRecomendation());
+													
 							defects.add(defect)	;
 							
 						}
@@ -368,15 +300,11 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 							if(solutionNlpInfo != null) {
 								//Indicator: The episode sentence contains more than one Sentence
 								if(solutionNlpInfo.getNumSentences() > 1) {
-									Defect defect = new Defect(); 
-									defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
-									defect.setScenarioId(structuredScenario.getId());
-									defect.setScenarioElement(ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement());
-									defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
-									defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_SENTENCE_INDICATOR.getDefectIndicator());
-									defect.setIndicator(defect.getIndicator().replace("<sentence>", solution));
-									defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-									defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_SENTENCE_INDICATOR.getFixRecomendation());
+									Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement(), alternativeId, 
+											QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
+											DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_SENTENCE_INDICATOR.getDefectIndicator(), solution, null, 
+											DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_SENTENCE_INDICATOR.getFixRecomendation());
+																	
 									defects.add(defect)	;
 								}
 
@@ -390,16 +318,11 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 
 								//Indicator: The alternative solution step contains more than one Subject
 								if(solutionNlpInfo.getSubjects() != null && !solutionNlpInfo.getSubjects().isEmpty() && solutionNlpInfo.getSubjects().size() > 1) {
-									Defect defect = new Defect(); 
-									defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
-									defect.setScenarioId(structuredScenario.getId());
-									defect.setScenarioElement(ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement());
-									defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
-									defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_SUBJECT_INDICATOR.getDefectIndicator());
-									defect.setIndicator(defect.getIndicator().replace("<sentence>", solution));
-									defect.setIndicator(defect.getIndicator().replace("<indicator>", solutionNlpInfo.getSubjectsAsString()));
-									defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-									defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_SUBJECT_INDICATOR.getFixRecomendation());
+									Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement(), alternativeId, 
+											QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
+											DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_SUBJECT_INDICATOR.getDefectIndicator(), solution, solutionNlpInfo.getSubjectsAsString(), 
+											DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_SUBJECT_INDICATOR.getFixRecomendation());
+																	
 									defects.add(defect)	;
 								} else {
 									//IF Episode-Sentence does not reference another scenario THEN Check Missing Subject
@@ -419,61 +342,42 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 						 		    	}
 									}
 									if(!isSystemActor) {
-										Defect defect = new Defect(); 
-										defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
-										defect.setScenarioId(structuredScenario.getId());
-										defect.setScenarioElement(ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement());
-										defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
-										defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MISSING_OBJECT_INDICATOR.getDefectIndicator());
-										defect.setIndicator(defect.getIndicator().replace("<sentence>", solution));
-										//defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
-										defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-										defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MISSING_OBJECT_INDICATOR.getFixRecomendation());
+										Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement(), alternativeId, 
+												QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
+												DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MISSING_OBJECT_INDICATOR.getDefectIndicator(), solution, null, 
+												DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MISSING_OBJECT_INDICATOR.getFixRecomendation());
+																			
 										defects.add(defect)	;
 									}
 								}
 								//Indicator: Missing Action-Verb in the alternative solution step
 								if(solutionNlpInfo.getMainActionVerbs() == null || solutionNlpInfo.getMainActionVerbs().isEmpty()) {
-									Defect defect = new Defect(); 
-									defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
-									defect.setScenarioId(structuredScenario.getId());
-									defect.setScenarioElement(ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement());
-									defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
-									defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MISSING_ACTION_VERB_INDICATOR.getDefectIndicator());
-									defect.setIndicator(defect.getIndicator().replace("<sentence>", solution));
-									//defect.setIndicator(defect.getIndicator().replace("<indicator>", indicator));
-									defect.setDefectCategory(DefectCategoryEnum.ERROR.getDefectCategory());
-									defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MISSING_ACTION_VERB_INDICATOR.getFixRecomendation());
+									Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement(), alternativeId, 
+											QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
+											DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MISSING_ACTION_VERB_INDICATOR.getDefectIndicator(), solution, null, 
+											DefectCategoryEnum.ERROR.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MISSING_ACTION_VERB_INDICATOR.getFixRecomendation());
+														
+									
 									defects.add(defect)	;
 								} else {
 									//Indicator: The alternative solution step contains more than one Action-Verb
 									if(solutionNlpInfo.getMainActionVerbs().entrySet().size() > 1) {
-										Defect defect = new Defect(); 
-										defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
-										defect.setScenarioId(structuredScenario.getId());
-										defect.setScenarioElement(ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement());
-										defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
-										defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_ACTION_VERB_INDICATOR.getDefectIndicator());
-										defect.setIndicator(defect.getIndicator().replace("<sentence>", solution));
-										defect.setIndicator(defect.getIndicator().replace("<indicator>", solutionNlpInfo.getMainActionVerbsAsString()));
-										defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-										defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_ACTION_VERB_INDICATOR.getFixRecomendation());
+										Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement(), alternativeId, 
+												QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
+												DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_ACTION_VERB_INDICATOR.getDefectIndicator(), solution, solutionNlpInfo.getMainActionVerbsAsString(), 
+												DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_ACTION_VERB_INDICATOR.getFixRecomendation());
+										
 										defects.add(defect)	;
 									}
 								
 									//Indicator: The alternative solution step contains an Action-verb not in the third or infinitive form 
 									for (Map.Entry<Integer, CustomToken> entry : solutionNlpInfo.getMainActionVerbs().entrySet()) {
 										if(!entry.getValue().getPosTag().equals(PosTagEnum.VBZ.name()) && !entry.getValue().getPosTag().equals(PosTagEnum.VBP.name()) && !entry.getValue().getPosTag().equals(PosTagEnum.VB.name())) {
-											Defect defect = new Defect(); 
-											defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
-											defect.setScenarioId(structuredScenario.getId());
-											defect.setScenarioElement(ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement());
-											defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
-											defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_ACTION_VERB_NOT_IN_THIRD_OR_BASE_FORM_INDICATOR.getDefectIndicator());
-											defect.setIndicator(defect.getIndicator().replace("<sentence>", solution));
-											defect.setIndicator(defect.getIndicator().replace("<indicator>", entry.getValue().getWord()));
-											defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-											defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_ACTION_VERB_NOT_IN_THIRD_OR_BASE_FORM_INDICATOR.getFixRecomendation());
+											Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement(), alternativeId, 
+													QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
+													DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_ACTION_VERB_NOT_IN_THIRD_OR_BASE_FORM_INDICATOR.getDefectIndicator(), solution, entry.getValue().getWord(), 
+													DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_ACTION_VERB_NOT_IN_THIRD_OR_BASE_FORM_INDICATOR.getFixRecomendation());
+											
 											defects.add(defect)	;
 											break;
 										}
@@ -482,31 +386,21 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 									
 									//Indicator: The alternative solution step contains more than one Complement-Action-Verb
 									if(solutionNlpInfo.getComplementActionVerbs().entrySet().size() > 1) {
-										Defect defect = new Defect(); 
-										defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
-										defect.setScenarioId(structuredScenario.getId());
-										defect.setScenarioElement(ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement());
-										defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
-										defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_COMPLEMENT_ACTION_VERB_INDICATOR.getDefectIndicator());
-										defect.setIndicator(defect.getIndicator().replace("<sentence>", solution));
-										defect.setIndicator(defect.getIndicator().replace("<indicator>", solutionNlpInfo.getComplementActionVerbsAsString()));
-										defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-										defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_COMPLEMENT_ACTION_VERB_INDICATOR.getFixRecomendation());
+										Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement(), alternativeId, 
+												QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
+												DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_COMPLEMENT_ACTION_VERB_INDICATOR.getDefectIndicator(), solution, solutionNlpInfo.getComplementActionVerbsAsString(), 
+												DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_COMPLEMENT_ACTION_VERB_INDICATOR.getFixRecomendation());
+																			
 										defects.add(defect)	;
 									}
 									
 									//Indicator: The alternative solution step contains more than one Modifier-Action-Verb
 									if(solutionNlpInfo.getModifierActionVerbs().entrySet().size() > 1) {
-										Defect defect = new Defect(); 
-										defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
-										defect.setScenarioId(structuredScenario.getId());
-										defect.setScenarioElement(ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement());
-										defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
-										defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_MODIFIER_ACTION_VERB_INDICATOR.getDefectIndicator());
-										defect.setIndicator(defect.getIndicator().replace("<sentence>", solution));
-										defect.setIndicator(defect.getIndicator().replace("<indicator>", solutionNlpInfo.getModifierActionVerbsAsString()));
-										defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-										defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_MODIFIER_ACTION_VERB_INDICATOR.getFixRecomendation());
+										Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement(), alternativeId, 
+												QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
+												DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_MODIFIER_ACTION_VERB_INDICATOR.getDefectIndicator(), solution, solutionNlpInfo.getModifierActionVerbsAsString(), 
+												DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_MORE_THAN_ONE_MODIFIER_ACTION_VERB_INDICATOR.getFixRecomendation());
+									
 										defects.add(defect)	;
 									}
 								}
@@ -523,19 +417,16 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 		List<String> extraInfTitle = ScenarioCleaner.checkExtraInformation(structuredScenario.getTitle());
 		//Indicator: The Title contains <i>unnecessary information
 		if (extraInfTitle != null && extraInfTitle.size() > 0 ) {
-			Defect defect = new Defect(); 
-			defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
-			defect.setScenarioId(structuredScenario.getId());
-			defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
-			defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_TITLE_UNNECESSARY_INFORMATION_INDICATOR.getDefectIndicator());
-			defect.setIndicator(defect.getIndicator().replace("<sentence>", structuredScenario.getTitle()));
+			
 			String indicators = EMPTY_CHAR;
 			for(String indicator : extraInfTitle)
 				indicators = indicators + ", " + indicator;
-			defect.setIndicator(defect.getIndicator().replace("<indicator>", indicators));
-
-			defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-			defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_TITLE_UNNECESSARY_INFORMATION_INDICATOR.getFixRecomendation());
+			
+			Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.TITLE.getScenarioElement(), null, 
+					QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
+					DefectIndicatorEnum.SIMPLICITY_TITLE_UNNECESSARY_INFORMATION_INDICATOR.getDefectIndicator(), structuredScenario.getTitle(), indicators, 
+					DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_TITLE_UNNECESSARY_INFORMATION_INDICATOR.getFixRecomendation());
+		
 			defects.add(defect)	;
 
 		}
@@ -560,32 +451,24 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 						//Indicator: Duplicated Episode Sentence
 						int distance = distanceAlgorithm.execute(episodeI.getSentence().toUpperCase(), episodeJ.getSentence().toUpperCase(), 2);
 						if (distance < 2) {
-							//Create Defect
-							Defect defect = new Defect(); 
-							defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
-							defect.setScenarioId(structuredScenario.getId());
-							defect.setScenarioElement(ScenarioElement.EPISODE_SENTENCE.getScenarioElement());
-							defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeIId));
-							defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_EPISODE_DUPLICATED_SENTENCE_INDICATOR.getDefectIndicator());
 							String indicators = episodeIId  + WHITESPACE_CHAR + episodeI.getSentence() + " and "+ episodeJId  + WHITESPACE_CHAR + episodeJ.getSentence();
-							defect.setIndicator(defect.getIndicator().replace("<indicator>", indicators));
-							defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-							defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_EPISODE_DUPLICATED_SENTENCE_INDICATOR.getFixRecomendation());
+							
+							Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.EPISODE_SENTENCE.getScenarioElement(), episodeIId, 
+									QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
+									DefectIndicatorEnum.SIMPLICITY_EPISODE_DUPLICATED_SENTENCE_INDICATOR.getDefectIndicator(), null, indicators, 
+									DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_EPISODE_DUPLICATED_SENTENCE_INDICATOR.getFixRecomendation());
+													
 							defects.add(defect)	;
 						}
 						//Indicator: Duplicated Episode Id/Step
 						if(episodeIId.toUpperCase().equals(episodeJId.toUpperCase())) {
-							//Create Defect
-							Defect defect = new Defect(); 
-							defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
-							defect.setScenarioId(structuredScenario.getId());
-							defect.setScenarioElement(ScenarioElement.EPISODE_ID.getScenarioElement());
-							defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeIId));
-							defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_EPISODE_DUPLICATED_ID_INDICATOR.getDefectIndicator());
 							String indicators = episodeIId  + " and "+ episodeJId;
-							defect.setIndicator(defect.getIndicator().replace("<indicator>", indicators));
-							defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-							defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_EPISODE_DUPLICATED_ID_INDICATOR.getFixRecomendation());
+							
+							Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.EPISODE_ID.getScenarioElement(), episodeIId, 
+									QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
+									DefectIndicatorEnum.SIMPLICITY_EPISODE_DUPLICATED_ID_INDICATOR.getDefectIndicator(), null, indicators, 
+									DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_EPISODE_DUPLICATED_ID_INDICATOR.getFixRecomendation());
+						
 							defects.add(defect)	;
 						}
 					}	
@@ -607,15 +490,11 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 					episodeId = episode.getId(); 
 				//Indicator: The Episode Sentence involves a validation action and it is hard to understand and follow (contain structures like checks if / see whether)
 				if(ScenarioParser.isEpisodeWithComplicatedValidationStep(episode.getRawEpisode())) {
-					Defect defect = new Defect(); 
-					defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
-					defect.setScenarioId(structuredScenario.getId());
-					defect.setScenarioElement(ScenarioElement.EPISODE_SENTENCE.getScenarioElement());
-					defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeId));
-					defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_EPISODE_COMPLICATED_VALIDATION_SENTENCE_INDICATOR.getDefectIndicator());
-					defect.setIndicator(defect.getIndicator().replace("<sentence>", episode.getRawEpisode()));
-					defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-					defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_EPISODE_COMPLICATED_VALIDATION_SENTENCE_INDICATOR.getFixRecomendation());
+					Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.EPISODE_SENTENCE.getScenarioElement(), episodeId, 
+							QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
+							DefectIndicatorEnum.SIMPLICITY_EPISODE_COMPLICATED_VALIDATION_SENTENCE_INDICATOR.getDefectIndicator(), episode.getRawEpisode(), null, 
+							DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_EPISODE_COMPLICATED_VALIDATION_SENTENCE_INDICATOR.getFixRecomendation());
+									
 					defects.add(defect)	;
 				}
 			}
@@ -640,16 +519,13 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 						String[] episodeId = episode.getId().split(RegularExpression.REGEX_DELIMITING_EPISODE_ID_FROM_SUB_EPISODE_ID);  // split text followed by ". , ;"
 						if (episodeId != null && episodeId.length > 1 ) {
 							if (episodeId[0].trim().toUpperCase().equals(prevEpisodeId.toUpperCase())) {
-								Defect defect = new Defect(); 
-								defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
-								defect.setScenarioId(structuredScenario.getId());
-								defect.setScenarioElement(ScenarioElement.EPISODE_ID.getScenarioElement());
-								defect.setScenarioElement(defect.getScenarioElement().replace("<id>", prevEpisodeId));
-								defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_EPISODE_NESTED_SENTENCE_INDICATOR.getDefectIndicator());
 								String indicators = prevEpisodeId  + " and "+ episode.getId();
-								defect.setIndicator(defect.getIndicator().replace("<indicator>", indicators));
-								defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-								defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_EPISODE_NESTED_SENTENCE_INDICATOR.getFixRecomendation());
+								
+								Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.EPISODE_ID.getScenarioElement(), prevEpisodeId, 
+										QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
+										DefectIndicatorEnum.SIMPLICITY_EPISODE_NESTED_SENTENCE_INDICATOR.getDefectIndicator(), null, indicators, 
+										DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_EPISODE_NESTED_SENTENCE_INDICATOR.getFixRecomendation());
+																
 								defects.add(defect)	;
 								break;								
 							} 
@@ -663,7 +539,7 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 		
 
 		//@Episódio 9: Check that alternate/exception is handled by a simple action [9], i.e, if the interruption is treated by a repeatable sequence of sentences (> 2), this sequence should be extracted to a separate scenario; (WARNING);
-		//@Episódio 10: Check that every alternate flow returns to a specific episode of the main flow and an exception finishes the scenario. (WARNING)
+		//@Episódio 10: Check that every alternative flow returns to a specific episode ofthe main flow or finishes the scenario. (WARNING)
 		if(structuredScenario.getAlternative() != null && !structuredScenario.getAlternative().isEmpty()) {
 			int numAlternative = 1;
 			for(StructuredAlternative alternative: structuredScenario.getAlternative()) {
@@ -672,57 +548,49 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 				if(alternative.getId() != null && !alternative.getId().isEmpty())
 					alternativeId = alternative.getId(); 
 				if (alternative.getSolution() != null && alternative.getSolution().size() > 3 ) {
-					Defect defect = new Defect(); 
-					defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
-					defect.setScenarioId(structuredScenario.getId());
-					defect.setScenarioElement(ScenarioElement.ALTERNATIVE_ID.getScenarioElement());
-					defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
-					defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_COMPLICATED_SOLUTION_INDICATOR.getDefectIndicator());
-					defect.setIndicator(defect.getIndicator().replace("<sentence>", alternative.getRawAlternative()));
-					defect.setIndicator(defect.getIndicator().replace("<indicator>", alternative.getSolution().size() + " steps"));
-					defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-					defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_COMPLICATED_SOLUTION_INDICATOR.getFixRecomendation());
+					Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.ALTERNATIVE_ID.getScenarioElement(), alternativeId, 
+							QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
+							DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_COMPLICATED_SOLUTION_INDICATOR.getDefectIndicator(), alternative.getRawAlternative(), alternative.getSolution().size() + " steps", 
+							DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_COMPLICATED_SOLUTION_INDICATOR.getFixRecomendation());
+										
 					defects.add(defect)	;								
 				}
 								
 				
 				if(!alternative.getSolution().isEmpty() && alternative.getSolutionStepWithGoToEpisode() > 0) {
-					//Indicator: The Alternate does not return to the main flow in the last solution step
+					//Indicator: The Alternative does not return to the main flow in the last solution step
 					if(!alternative.getSolutionStepWithGoToEpisode().equals(alternative.getSolution().size())) {
-						Defect defect = new Defect(); 
-						defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
-						defect.setScenarioId(structuredScenario.getId());
-						defect.setScenarioElement(ScenarioElement.ALTERNATIVE_ID.getScenarioElement());
-						defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
-						defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_GOTO_NOT_IN_LAST_ALTERNATE_SOLUTION_STEP_INDICATOR.getDefectIndicator());
-						defect.setIndicator(defect.getIndicator().replace("<sentence>", alternative.getRawAlternative()));
-						defect.setIndicator(defect.getIndicator().replace("<indicator>", alternative.getSolutionStepWithGoToEpisode().toString()));
-						defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-						defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_GOTO_NOT_IN_LAST_ALTERNATE_SOLUTION_STEP_INDICATOR.getFixRecomendation());
+						Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.ALTERNATIVE_ID.getScenarioElement(), alternativeId, 
+								QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
+								DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_GOTO_NOT_IN_LAST_ALTERNATE_SOLUTION_STEP_INDICATOR.getDefectIndicator(), alternative.getRawAlternative(), alternative.getSolutionStepWithGoToEpisode().toString(), 
+								DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_GOTO_NOT_IN_LAST_ALTERNATE_SOLUTION_STEP_INDICATOR.getFixRecomendation());
+						
 						defects.add(defect)	;	
 					}
-					//Indicator: The Alternate returns to the main flow using an invalid episode Id/Step
+					//Indicator: The Alternative returns to the main flow using an invalid episode Id/Step
 					if(alternative.getGoToEpisode() == null) {
-						Defect defect = new Defect(); 
-						defect.setQualityProperty(QualityPropertyEnum.SIMPLICITY.getQualityProperty());
-						defect.setScenarioId(structuredScenario.getId());
-						defect.setScenarioElement(ScenarioElement.ALTERNATIVE_ID.getScenarioElement());
-						defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
-						defect.setIndicator(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_GOTO_WITHOUT_EPISODE_IN_ALTERNATE_SOLUTION_STEP_INDICATOR.getDefectIndicator());
-						defect.setIndicator(defect.getIndicator().replace("<sentence>", alternative.getRawAlternative()));
-						defect.setIndicator(defect.getIndicator().replace("<indicator>", alternative.getSolutionStepWithGoToEpisode().toString()));
-						defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-						defect.setFixRecomendation(DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_GOTO_WITHOUT_EPISODE_IN_ALTERNATE_SOLUTION_STEP_INDICATOR.getFixRecomendation());
+						Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.ALTERNATIVE_ID.getScenarioElement(), alternativeId, 
+								QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
+								DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_GOTO_WITHOUT_EPISODE_IN_ALTERNATE_SOLUTION_STEP_INDICATOR.getDefectIndicator(), alternative.getRawAlternative(), alternative.getSolutionStepWithGoToEpisode().toString(), 
+								DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_GOTO_WITHOUT_EPISODE_IN_ALTERNATE_SOLUTION_STEP_INDICATOR.getFixRecomendation());
+												
+						defects.add(defect)	;	
+					}
+					//Indicator: The Alternative does not finish the scenario in the last solution step
+					if(!alternative.getSolutionStepWithEndScenario().equals(alternative.getSolution().size())) {
+						Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.ALTERNATIVE_ID.getScenarioElement(), alternativeId, 
+								QualityPropertyEnum.SIMPLICITY.getQualityProperty(), 
+								DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_END_NOT_IN_LAST_ALTERNATE_SOLUTION_STEP_INDICATOR.getDefectIndicator(), alternative.getRawAlternative(), alternative.getSolutionStepWithEndScenario().toString(), 
+								DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.SIMPLICITY_ALTERNATIVE_END_NOT_IN_LAST_ALTERNATE_SOLUTION_STEP_INDICATOR.getFixRecomendation());
+						
 						defects.add(defect)	;	
 					}
 				}
 				
 				
-
 				numAlternative++;				
 			}
 		}
-		
 		
 
 		return defects;
@@ -739,51 +607,44 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 		//@Episódio 1: Ensure that Title is present [9]; (ERROR)
 		//Indicator: Missing Title
 		if(structuredScenario.getTitle() == null || structuredScenario.getTitle().isEmpty()) {
-			Defect defect = new Defect(); 
-			defect.setQualityProperty(QualityPropertyEnum.UNIFORMITY.getQualityProperty());
-			defect.setScenarioId(structuredScenario.getId());
-			defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
-			defect.setIndicator(DefectIndicatorEnum.UNIFORMITY_MISSING_TITLE_INDICATOR.getDefectIndicator());
-			defect.setDefectCategory(DefectCategoryEnum.ERROR.getDefectCategory());
-			defect.setFixRecomendation(DefectIndicatorEnum.UNIFORMITY_MISSING_TITLE_INDICATOR.getFixRecomendation());
+			Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.TITLE.getScenarioElement(), null, 
+					QualityPropertyEnum.UNIFORMITY.getQualityProperty(), 
+					DefectIndicatorEnum.UNIFORMITY_MISSING_TITLE_INDICATOR.getDefectIndicator(), null, null, 
+					DefectCategoryEnum.ERROR.getDefectCategory(), DefectIndicatorEnum.UNIFORMITY_MISSING_TITLE_INDICATOR.getFixRecomendation());
+			
 			defects.add(defect)	;
 		}
 
 		//@Episódio 2: Ensure that Goal is present [9]; (ERROR)
 		//Indicator: Missing Goal
 		if(structuredScenario.getGoal() == null || structuredScenario.getGoal().isEmpty()) {
-			Defect defect = new Defect(); 
-			defect.setQualityProperty(QualityPropertyEnum.UNIFORMITY.getQualityProperty());
-			defect.setScenarioId(structuredScenario.getId());
-			defect.setScenarioElement(ScenarioElement.GOAL.getScenarioElement());
-			defect.setIndicator(DefectIndicatorEnum.UNIFORMITY_MISSING_GOAL_INDICATOR.getDefectIndicator());
-			defect.setDefectCategory(DefectCategoryEnum.ERROR.getDefectCategory());
-			defect.setFixRecomendation(DefectIndicatorEnum.UNIFORMITY_MISSING_GOAL_INDICATOR.getFixRecomendation());
+			Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.GOAL.getScenarioElement(), null, 
+					QualityPropertyEnum.UNIFORMITY.getQualityProperty(), 
+					DefectIndicatorEnum.UNIFORMITY_MISSING_GOAL_INDICATOR.getDefectIndicator(), null, null, 
+					DefectCategoryEnum.ERROR.getDefectCategory(), DefectIndicatorEnum.UNIFORMITY_MISSING_GOAL_INDICATOR.getFixRecomendation());
+			
 			defects.add(defect)	;
 		}
 		//@Episódio 3: Check the existence of more than one Actor per Scenario [9]; (ERROR)
 		//Indicator: Missing Actors
 		if(structuredScenario.getActors() == null || structuredScenario.getActors().isEmpty() ) { //|| structuredScenario.getActors().size() == 1) {
-			Defect defect = new Defect(); 
-			defect.setQualityProperty(QualityPropertyEnum.UNIFORMITY.getQualityProperty());
-			defect.setScenarioId(structuredScenario.getId());
-			defect.setScenarioElement(ScenarioElement.ACTORS.getScenarioElement());
-			defect.setIndicator(DefectIndicatorEnum.UNIFORMITY_MISSING_ACTOR_INDICATOR.getDefectIndicator());
-			defect.setDefectCategory(DefectCategoryEnum.ERROR.getDefectCategory());
-			defect.setFixRecomendation(DefectIndicatorEnum.UNIFORMITY_MISSING_ACTOR_INDICATOR.getFixRecomendation());
+			Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.ACTORS.getScenarioElement(), null, 
+					QualityPropertyEnum.UNIFORMITY.getQualityProperty(), 
+					DefectIndicatorEnum.UNIFORMITY_MISSING_ACTOR_INDICATOR.getDefectIndicator(), null, null, 
+					DefectCategoryEnum.ERROR.getDefectCategory(), DefectIndicatorEnum.UNIFORMITY_MISSING_ACTOR_INDICATOR.getFixRecomendation());
+			
+			
 			defects.add(defect)	;
 		}
 
 		//@Episódio 4: Check the existence of more than one resource per Scenario [9]; (ERROR)
 		//Indicator: Missing Resources
 		if(structuredScenario.getResources() == null || structuredScenario.getResources().isEmpty()) {
-			Defect defect = new Defect(); 
-			defect.setQualityProperty(QualityPropertyEnum.UNIFORMITY.getQualityProperty());
-			defect.setScenarioId(structuredScenario.getId());
-			defect.setScenarioElement(ScenarioElement.RESOURCES.getScenarioElement());
-			defect.setIndicator(DefectIndicatorEnum.UNIFORMITY_MISSING_RESOURCES_INDICATOR.getDefectIndicator());
-			defect.setDefectCategory(DefectCategoryEnum.ERROR.getDefectCategory());
-			defect.setFixRecomendation(DefectIndicatorEnum.UNIFORMITY_MISSING_RESOURCES_INDICATOR.getFixRecomendation());
+			Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.RESOURCES.getScenarioElement(), null, 
+					QualityPropertyEnum.UNIFORMITY.getQualityProperty(), 
+					DefectIndicatorEnum.UNIFORMITY_MISSING_RESOURCES_INDICATOR.getDefectIndicator(), null, null, 
+					DefectCategoryEnum.ERROR.getDefectCategory(), DefectIndicatorEnum.UNIFORMITY_MISSING_RESOURCES_INDICATOR.getFixRecomendation());
+			
 			defects.add(defect)	;
 		}
 		//@Episódio 5: Ensure that Context contains its relevant sub-components [9]; (ERROR)
@@ -793,26 +654,22 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 			&& (structuredScenario.getContext().getTemporalLocation() == null || structuredScenario.getContext().getTemporalLocation().isEmpty() )
 			&& (structuredScenario.getContext().getGeographicalLocation() == null || structuredScenario.getContext().getGeographicalLocation().isEmpty() )
 				) {
-			Defect defect = new Defect(); 
-			defect.setQualityProperty(QualityPropertyEnum.UNIFORMITY.getQualityProperty());
-			defect.setScenarioId(structuredScenario.getId());
-			defect.setScenarioElement(ScenarioElement.CONTEXT.getScenarioElement());
-			defect.setIndicator(DefectIndicatorEnum.UNIFORMITY_MISSING_CONTEXT_SUBCOMPONENTS_INDICATOR.getDefectIndicator());
-			defect.setDefectCategory(DefectCategoryEnum.INFO.getDefectCategory());
-			defect.setFixRecomendation(DefectIndicatorEnum.UNIFORMITY_MISSING_CONTEXT_SUBCOMPONENTS_INDICATOR.getFixRecomendation());
+			Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.CONTEXT.getScenarioElement(), null, 
+					QualityPropertyEnum.UNIFORMITY.getQualityProperty(), 
+					DefectIndicatorEnum.UNIFORMITY_MISSING_CONTEXT_SUBCOMPONENTS_INDICATOR.getDefectIndicator(), null, null, 
+					DefectCategoryEnum.INFO.getDefectCategory(), DefectIndicatorEnum.UNIFORMITY_MISSING_CONTEXT_SUBCOMPONENTS_INDICATOR.getFixRecomendation());
+			
 			defects.add(defect)	;
 		}
 
 		//@Episódio 6: Check the existence of more than one Episode per Scenario [9]; (ERROR)
 		//Indicator: Missing Episodes
 		if(structuredScenario.getEpisodes() == null || structuredScenario.getEpisodes().isEmpty() || structuredScenario.getEpisodes().size() == 1) {
-			Defect defect = new Defect(); 
-			defect.setQualityProperty(QualityPropertyEnum.UNIFORMITY.getQualityProperty());
-			defect.setScenarioId(structuredScenario.getId());
-			defect.setScenarioElement(ScenarioElement.EPISODES.getScenarioElement());
-			defect.setIndicator(DefectIndicatorEnum.UNIFORMITY_MISSING_EPISODES_INDICATOR.getDefectIndicator());
-			defect.setDefectCategory(DefectCategoryEnum.ERROR.getDefectCategory());
-			defect.setFixRecomendation(DefectIndicatorEnum.UNIFORMITY_MISSING_EPISODES_INDICATOR.getFixRecomendation());
+			Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.EPISODES.getScenarioElement(), null, 
+					QualityPropertyEnum.UNIFORMITY.getQualityProperty(), 
+					DefectIndicatorEnum.UNIFORMITY_MISSING_EPISODES_INDICATOR.getDefectIndicator(), null, null, 
+					DefectCategoryEnum.ERROR.getDefectCategory(), DefectIndicatorEnum.UNIFORMITY_MISSING_EPISODES_INDICATOR.getFixRecomendation());
+			
 			defects.add(defect)	;
 		}
 		//@Episódio 7: Ensure that Episode contains its relevant parts [9]; (ERROR)
@@ -824,30 +681,21 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 			if(episode.getId() != null && !episode.getId().isEmpty())
 				episodeId = episode.getId(); 
 			else { //Indicator: The episode does not contain its relevant parts - Id/Step
-				Defect defect = new Defect(); 
-				defect.setQualityProperty(QualityPropertyEnum.UNIFORMITY.getQualityProperty());
-				defect.setScenarioId(structuredScenario.getId());
-				defect.setScenarioElement(ScenarioElement.EPISODE_ID.getScenarioElement());
-				defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeId));
-				defect.setIndicator(DefectIndicatorEnum.UNIFORMITY_MISSING_EPISODE_SUBCOMPONENTS_INDICATOR.getDefectIndicator());
-				defect.setIndicator(defect.getIndicator().replace("<sentence>", episode.getRawEpisode()));
-				defect.setIndicator(defect.getIndicator().replace("<indicator>", "ID"));
-				defect.setDefectCategory(DefectCategoryEnum.ERROR.getDefectCategory());
-				defect.setFixRecomendation(DefectIndicatorEnum.UNIFORMITY_MISSING_EPISODE_SUBCOMPONENTS_INDICATOR.getFixRecomendation());
+				Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.EPISODE_ID.getScenarioElement(), episodeId, 
+						QualityPropertyEnum.UNIFORMITY.getQualityProperty(), 
+						DefectIndicatorEnum.UNIFORMITY_MISSING_EPISODE_SUBCOMPONENTS_INDICATOR.getDefectIndicator(), episode.getRawEpisode(), "ID", 
+						DefectCategoryEnum.ERROR.getDefectCategory(), DefectIndicatorEnum.UNIFORMITY_MISSING_EPISODE_SUBCOMPONENTS_INDICATOR.getFixRecomendation());
+				
+				
 				defects.add(defect)	;
 			}
 			if(episode.getSentence() == null || episode.getSentence().isEmpty()) {
 				//Indicator: The episode does not contain its relevant parts - Sentence
-				Defect defect = new Defect(); 
-				defect.setQualityProperty(QualityPropertyEnum.UNIFORMITY.getQualityProperty());
-				defect.setScenarioId(structuredScenario.getId());
-				defect.setScenarioElement(ScenarioElement.EPISODE_SENTENCE.getScenarioElement());
-				defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeId));
-				defect.setIndicator(DefectIndicatorEnum.UNIFORMITY_MISSING_EPISODE_SUBCOMPONENTS_INDICATOR.getDefectIndicator());
-				defect.setIndicator(defect.getIndicator().replace("<sentence>", episode.getRawEpisode()));
-				defect.setIndicator(defect.getIndicator().replace("<indicator>", "Sentence"));
-				defect.setDefectCategory(DefectCategoryEnum.ERROR.getDefectCategory());
-				defect.setFixRecomendation(DefectIndicatorEnum.UNIFORMITY_MISSING_EPISODE_SUBCOMPONENTS_INDICATOR.getFixRecomendation());
+				Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.EPISODE_SENTENCE.getScenarioElement(), episodeId, 
+						QualityPropertyEnum.UNIFORMITY.getQualityProperty(), 
+						DefectIndicatorEnum.UNIFORMITY_MISSING_EPISODE_SUBCOMPONENTS_INDICATOR.getDefectIndicator(), episode.getRawEpisode(), "Sentence", 
+						DefectCategoryEnum.ERROR.getDefectCategory(), DefectIndicatorEnum.UNIFORMITY_MISSING_EPISODE_SUBCOMPONENTS_INDICATOR.getFixRecomendation());
+								
 				defects.add(defect)	;
 			} else {
 				
@@ -861,16 +709,11 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 			if(!episode.isSimple())
 				if(episode.getConditions() == null || episode.getConditions().isEmpty()) {
 					//Indicator: IF episode is not conditional THEN The episode does not contain its relevant parts - Conditions
-					Defect defect = new Defect(); 
-					defect.setQualityProperty(QualityPropertyEnum.UNIFORMITY.getQualityProperty());
-					defect.setScenarioId(structuredScenario.getId());
-					defect.setScenarioElement(ScenarioElement.EPISODE_CONDITION.getScenarioElement());
-					defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeId));
-					defect.setIndicator(DefectIndicatorEnum.UNIFORMITY_MISSING_EPISODE_SUBCOMPONENTS_INDICATOR.getDefectIndicator());
-					defect.setIndicator(defect.getIndicator().replace("<sentence>", episode.getRawEpisode()));
-					defect.setIndicator(defect.getIndicator().replace("<indicator>", "Conditions"));
-					defect.setDefectCategory(DefectCategoryEnum.ERROR.getDefectCategory());
-					defect.setFixRecomendation(DefectIndicatorEnum.UNIFORMITY_MISSING_EPISODE_SUBCOMPONENTS_INDICATOR.getFixRecomendation());
+					Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.EPISODE_CONDITION.getScenarioElement(), episodeId, 
+							QualityPropertyEnum.UNIFORMITY.getQualityProperty(), 
+							DefectIndicatorEnum.UNIFORMITY_MISSING_EPISODE_SUBCOMPONENTS_INDICATOR.getDefectIndicator(), episode.getRawEpisode(), "Conditions", 
+							DefectCategoryEnum.ERROR.getDefectCategory(), DefectIndicatorEnum.UNIFORMITY_MISSING_EPISODE_SUBCOMPONENTS_INDICATOR.getFixRecomendation());
+											
 					defects.add(defect)	;
 				}
 			numEpisode++;				
@@ -878,13 +721,11 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 		//@Episódio 8: Ensure that non-sequential episodes constructs have a begin and an end keywords; (ERROR)
 		//Indicator: Incomplete non-sequential construct in non-sequential episodes delimited by # ... #
 		if(numEpisodesGroupStart != numEpisodesGroupEnd) {
-			Defect defect = new Defect(); 
-			defect.setQualityProperty(QualityPropertyEnum.UNIFORMITY.getQualityProperty());
-			defect.setScenarioId(structuredScenario.getId());
-			defect.setScenarioElement(ScenarioElement.EPISODES.getScenarioElement());
-			defect.setIndicator(DefectIndicatorEnum.UNIFORMITY_MISSING_EPISODES_GROUP_INDICATOR.getDefectIndicator());
-			defect.setDefectCategory(DefectCategoryEnum.ERROR.getDefectCategory());
-			defect.setFixRecomendation(DefectIndicatorEnum.UNIFORMITY_MISSING_EPISODES_GROUP_INDICATOR.getFixRecomendation());
+			Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.EPISODES.getScenarioElement(), null, 
+					QualityPropertyEnum.UNIFORMITY.getQualityProperty(), 
+					DefectIndicatorEnum.UNIFORMITY_MISSING_EPISODES_GROUP_INDICATOR.getDefectIndicator(), null, null, 
+					DefectCategoryEnum.ERROR.getDefectCategory(), DefectIndicatorEnum.UNIFORMITY_MISSING_EPISODES_GROUP_INDICATOR.getFixRecomendation());
+						
 			defects.add(defect)	;
 		}
 		//@Episódio 9: Ensure that Alternative contains its relevant parts [9]; (ERROR)
@@ -894,46 +735,31 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 			if(alternative.getId() != null && !alternative.getId().isEmpty())
 				alternativeId = alternative.getId(); 
 			else { //indicator: The alternate/exception does not contain its relevant parts - Id/StepRef
-				Defect defect = new Defect(); 
-				defect.setQualityProperty(QualityPropertyEnum.UNIFORMITY.getQualityProperty());
-				defect.setScenarioId(structuredScenario.getId());
-				defect.setScenarioElement(ScenarioElement.ALTERNATIVE_ID.getScenarioElement());
-				defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
-				defect.setIndicator(DefectIndicatorEnum.UNIFORMITY_MISSING_ALTERNATIVE_SUBCOMPONENTS_INDICATOR.getDefectIndicator());
-				defect.setIndicator(defect.getIndicator().replace("<sentence>", alternative.getRawAlternative()));
-				defect.setIndicator(defect.getIndicator().replace("<indicator>", "ID"));
-				defect.setDefectCategory(DefectCategoryEnum.ERROR.getDefectCategory());
-				defect.setFixRecomendation(DefectIndicatorEnum.UNIFORMITY_MISSING_ALTERNATIVE_SUBCOMPONENTS_INDICATOR.getFixRecomendation());
+				Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.ALTERNATIVE_ID.getScenarioElement(), alternativeId, 
+						QualityPropertyEnum.UNIFORMITY.getQualityProperty(), 
+						DefectIndicatorEnum.UNIFORMITY_MISSING_ALTERNATIVE_SUBCOMPONENTS_INDICATOR.getDefectIndicator(), alternative.getRawAlternative(), "ID", 
+						DefectCategoryEnum.ERROR.getDefectCategory(), DefectIndicatorEnum.UNIFORMITY_MISSING_ALTERNATIVE_SUBCOMPONENTS_INDICATOR.getFixRecomendation());
+								
 				defects.add(defect)	;
 			}
 			if(alternative.getSolution() == null || alternative.getSolution().isEmpty()) {
 				//indicator: The alternate/exception does not contain its relevant parts -  Solution
-				Defect defect = new Defect(); 
-				defect.setQualityProperty(QualityPropertyEnum.UNIFORMITY.getQualityProperty());
-				defect.setScenarioId(structuredScenario.getId());
-				defect.setScenarioElement(ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement());
-				defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
-				defect.setIndicator(DefectIndicatorEnum.UNIFORMITY_MISSING_ALTERNATIVE_SUBCOMPONENTS_INDICATOR.getDefectIndicator());
-				defect.setIndicator(defect.getIndicator().replace("<sentence>", alternative.getRawAlternative()));
-				defect.setIndicator(defect.getIndicator().replace("<indicator>", "Solution"));
-				defect.setDefectCategory(DefectCategoryEnum.ERROR.getDefectCategory());
-				defect.setFixRecomendation(DefectIndicatorEnum.UNIFORMITY_MISSING_ALTERNATIVE_SUBCOMPONENTS_INDICATOR.getFixRecomendation());
+				Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement(), alternativeId, 
+						QualityPropertyEnum.UNIFORMITY.getQualityProperty(), 
+						DefectIndicatorEnum.UNIFORMITY_MISSING_ALTERNATIVE_SUBCOMPONENTS_INDICATOR.getDefectIndicator(), alternative.getRawAlternative(), "Solution", 
+						DefectCategoryEnum.ERROR.getDefectCategory(), DefectIndicatorEnum.UNIFORMITY_MISSING_ALTERNATIVE_SUBCOMPONENTS_INDICATOR.getFixRecomendation());
+				
 				defects.add(defect)	;
 			}
 			
 			
 			if(alternative.getCauses() == null || alternative.getCauses().isEmpty()) {
 				//indicator: The alternate/exception does not contain its relevant parts -  Causes
-				Defect defect = new Defect(); 
-				defect.setQualityProperty(QualityPropertyEnum.UNIFORMITY.getQualityProperty());
-				defect.setScenarioId(structuredScenario.getId());
-				defect.setScenarioElement(ScenarioElement.ALTERNATIVE_CAUSE.getScenarioElement());
-				defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
-				defect.setIndicator(DefectIndicatorEnum.UNIFORMITY_MISSING_ALTERNATIVE_SUBCOMPONENTS_INDICATOR.getDefectIndicator());
-				defect.setIndicator(defect.getIndicator().replace("<sentence>", alternative.getRawAlternative()));
-				defect.setIndicator(defect.getIndicator().replace("<indicator>", "Causes"));
-				defect.setDefectCategory(DefectCategoryEnum.ERROR.getDefectCategory());
-				defect.setFixRecomendation(DefectIndicatorEnum.UNIFORMITY_MISSING_ALTERNATIVE_SUBCOMPONENTS_INDICATOR.getFixRecomendation());
+				Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.ALTERNATIVE_CAUSE.getScenarioElement(), alternativeId, 
+						QualityPropertyEnum.UNIFORMITY.getQualityProperty(), 
+						DefectIndicatorEnum.UNIFORMITY_MISSING_ALTERNATIVE_SUBCOMPONENTS_INDICATOR.getDefectIndicator(), alternative.getRawAlternative(), "Causes", 
+						DefectCategoryEnum.ERROR.getDefectCategory(), DefectIndicatorEnum.UNIFORMITY_MISSING_ALTERNATIVE_SUBCOMPONENTS_INDICATOR.getFixRecomendation());
+				
 				defects.add(defect)	;
 			}
 			numAlternative++;				
@@ -962,14 +788,11 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 				}
 			}
 			if(!isUsed) {
-				Defect defect = new Defect(); 
-				defect.setQualityProperty(QualityPropertyEnum.USEFULNESS.getQualityProperty());
-				defect.setScenarioId(structuredScenario.getId());
-				defect.setScenarioElement(ScenarioElement.ACTORS.getScenarioElement());
-				defect.setIndicator(DefectIndicatorEnum.USEFULNES_UNUSED_ACTOR_INDICATOR.getDefectIndicator());
-				defect.setIndicator(defect.getIndicator().replace("<indicator>", actor));
-				defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-				defect.setFixRecomendation(DefectIndicatorEnum.USEFULNES_UNUSED_ACTOR_INDICATOR.getFixRecomendation());
+				Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.ACTORS.getScenarioElement(), null, 
+						QualityPropertyEnum.USEFULNESS.getQualityProperty(), 
+						DefectIndicatorEnum.USEFULNES_UNUSED_ACTOR_INDICATOR.getDefectIndicator(), null, actor, 
+						DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.USEFULNES_UNUSED_ACTOR_INDICATOR.getFixRecomendation());
+				
 				defects.add(defect)	;
 			}
 		}
@@ -988,14 +811,11 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 				}
 			}
 			if(!isUsed) {
-				Defect defect = new Defect(); 
-				defect.setQualityProperty(QualityPropertyEnum.USEFULNESS.getQualityProperty());
-				defect.setScenarioId(structuredScenario.getId());
-				defect.setScenarioElement(ScenarioElement.RESOURCES.getScenarioElement());
-				defect.setIndicator(DefectIndicatorEnum.USEFULNES_UNUSED_RESOURCE_INDICATOR.getDefectIndicator());
-				defect.setIndicator(defect.getIndicator().replace("<indicator>", resource));
-				defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-				defect.setFixRecomendation(DefectIndicatorEnum.USEFULNES_UNUSED_RESOURCE_INDICATOR.getFixRecomendation());
+				Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.RESOURCES.getScenarioElement(), null, 
+						QualityPropertyEnum.USEFULNESS.getQualityProperty(), 
+						DefectIndicatorEnum.USEFULNES_UNUSED_RESOURCE_INDICATOR.getDefectIndicator(), null, resource, 
+						DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.USEFULNES_UNUSED_RESOURCE_INDICATOR.getFixRecomendation());
+				
 				defects.add(defect)	;
 			}
 		}
@@ -1044,20 +864,12 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 					 		    }
 				 		    }
 				 		    if(!declaredSubject) { 
-				 		    	Defect defect = new Defect(); 
-								defect.setQualityProperty(QualityPropertyEnum.USEFULNESS.getQualityProperty());
-								defect.setScenarioId(structuredScenario.getId());
-								defect.setScenarioElement(ScenarioElement.EPISODE_SENTENCE.getScenarioElement());
-								defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeId));
-								defect.setIndicator(DefectIndicatorEnum.USEFULNES_EPISODE_UNDECLARED_ACTOR_INDICATOR.getDefectIndicator());
-								defect.setIndicator(defect.getIndicator().replace("<sentence>", episode.getSentence()));
-								defect.setIndicator(defect.getIndicator().replace("<indicator>", subject.getValue().getWord()));
-								if(!referenceSubscenario)
-									defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-								else
-									defect.setDefectCategory(DefectCategoryEnum.INFO.getDefectCategory());
-								
-								defect.setFixRecomendation(DefectIndicatorEnum.USEFULNES_EPISODE_UNDECLARED_ACTOR_INDICATOR.getFixRecomendation());
+				 		    	Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.EPISODE_SENTENCE.getScenarioElement(), episodeId, 
+										QualityPropertyEnum.USEFULNESS.getQualityProperty(), 
+										DefectIndicatorEnum.USEFULNES_EPISODE_UNDECLARED_ACTOR_INDICATOR.getDefectIndicator(), episode.getSentence(), subject.getValue().getWord(), 
+										referenceSubscenario ? DefectCategoryEnum.INFO.getDefectCategory(): DefectCategoryEnum.WARNING.getDefectCategory(), 
+										DefectIndicatorEnum.USEFULNES_EPISODE_UNDECLARED_ACTOR_INDICATOR.getFixRecomendation());
+										 		    	
 								defects.add(defect)	;
 				 		    }
 				        }
@@ -1152,16 +964,11 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 											}
 										}
 										if(!declaredSubject && !referenceSubscenario) {
-											Defect defect = new Defect(); 
-											defect.setQualityProperty(QualityPropertyEnum.USEFULNESS.getQualityProperty());
-											defect.setScenarioId(structuredScenario.getId());
-											defect.setScenarioElement(ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement());
-											defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
-											defect.setIndicator(DefectIndicatorEnum.USEFULNES_ALTERNATIVE_UNDECLARED_ACTOR_INDICATOR.getDefectIndicator());
-											defect.setIndicator(defect.getIndicator().replace("<sentence>", solution));
-											defect.setIndicator(defect.getIndicator().replace("<indicator>", subject.getValue().getWord()));
-											defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-											defect.setFixRecomendation(DefectIndicatorEnum.USEFULNES_ALTERNATIVE_UNDECLARED_ACTOR_INDICATOR.getFixRecomendation());
+											Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement(), alternativeId, 
+													QualityPropertyEnum.USEFULNESS.getQualityProperty(), 
+													DefectIndicatorEnum.USEFULNES_ALTERNATIVE_UNDECLARED_ACTOR_INDICATOR.getDefectIndicator(), solution, subject.getValue().getWord(), 
+													DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.USEFULNES_ALTERNATIVE_UNDECLARED_ACTOR_INDICATOR.getFixRecomendation());
+										
 											defects.add(defect)	;
 										}
 									}
@@ -1187,14 +994,11 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 			if(alternative.getId() != null && !alternative.getId().isEmpty())
 				alternativeId = alternative.getId(); 
 			if(alternative.getBranchingEpisode() == null || alternative.getBranchingEpisode().getId() == null || alternative.getBranchingEpisode().getId().isEmpty()) {
-				Defect defect = new Defect(); 
-				defect.setQualityProperty(QualityPropertyEnum.USEFULNESS.getQualityProperty());
-				defect.setScenarioId(structuredScenario.getId());
-				defect.setScenarioElement(ScenarioElement.ALTERNATIVE_ID.getScenarioElement());
-				defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
-				defect.setIndicator(DefectIndicatorEnum.USEFULNES_ALTERNATIVE_WITHOUT_BRANCHING_EPISODE_INDICATOR.getDefectIndicator());
-				defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-				defect.setFixRecomendation(DefectIndicatorEnum.USEFULNES_ALTERNATIVE_WITHOUT_BRANCHING_EPISODE_INDICATOR.getFixRecomendation());
+				Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.ALTERNATIVE_ID.getScenarioElement(), alternativeId, 
+						QualityPropertyEnum.USEFULNESS.getQualityProperty(), 
+						DefectIndicatorEnum.USEFULNES_ALTERNATIVE_WITHOUT_BRANCHING_EPISODE_INDICATOR.getDefectIndicator(), null, null, 
+						DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.USEFULNES_ALTERNATIVE_WITHOUT_BRANCHING_EPISODE_INDICATOR.getFixRecomendation());
+							
 				defects.add(defect)	;
 			}
 			
@@ -1202,14 +1006,12 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 		//@Episódio 7: Check the existence of more than two and less to 10 episodes per scenario [9] [60]  (WARNING)
 		//Indicator: Number of episodes in current scenario is less than 3 or more than 9
 		if(structuredScenario.getEpisodes() != null && (structuredScenario.getEpisodes().size() < 3 || structuredScenario.getEpisodes().size() > 9)) {
-			Defect defect = new Defect(); 
-			defect.setQualityProperty(QualityPropertyEnum.USEFULNESS.getQualityProperty());
-			defect.setScenarioId(structuredScenario.getId());
-			defect.setScenarioElement(ScenarioElement.EPISODES.getScenarioElement());
-			defect.setIndicator(DefectIndicatorEnum.USEFULNES_EPISODES_NOT_BETWEEN_3_AND_9_INDICATOR.getDefectIndicator());
-			defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>",  structuredScenario.getEpisodes().size() + " steps"));
-			defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-			defect.setFixRecomendation(DefectIndicatorEnum.USEFULNES_EPISODES_NOT_BETWEEN_3_AND_9_INDICATOR.getFixRecomendation());
+			Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.EPISODES.getScenarioElement(), null, 
+					QualityPropertyEnum.USEFULNESS.getQualityProperty(), 
+					DefectIndicatorEnum.USEFULNES_EPISODES_NOT_BETWEEN_3_AND_9_INDICATOR.getDefectIndicator(), null, structuredScenario.getEpisodes().size() + " steps", 
+					DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.USEFULNES_EPISODES_NOT_BETWEEN_3_AND_9_INDICATOR.getFixRecomendation());
+			
+			
 			defects.add(defect)	;
 		}
 		
@@ -1228,15 +1030,11 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 		//NLP
 		//Indicator: The corresponding verbs and objects in Title and Goal are not the same
 		if (isSintacticallySimilar(structuredScenario.getTitleNlp(), structuredScenario.getGoalNlp()) == false) {
-			Defect defect = new Defect(); 
-			defect.setQualityProperty(QualityPropertyEnum.CONCEPTUALLY_SOUNDNESS.getQualityProperty());
-			defect.setScenarioId(structuredScenario.getId());
-			defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
-			defect.setIndicator(DefectIndicatorEnum.CONCEPTUALLY_SOUNDNESS_TITLE_DO_NOT_DESCRIBE_GOAL_INDICATOR.getDefectIndicator());
-			defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", structuredScenario.getTitle()));
-			defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", structuredScenario.getGoal()));
-			defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-			defect.setFixRecomendation(DefectIndicatorEnum.CONCEPTUALLY_SOUNDNESS_TITLE_DO_NOT_DESCRIBE_GOAL_INDICATOR.getFixRecomendation());
+			Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.TITLE.getScenarioElement(), null, 
+					QualityPropertyEnum.CONCEPTUALLY_SOUNDNESS.getQualityProperty(), 
+					DefectIndicatorEnum.CONCEPTUALLY_SOUNDNESS_TITLE_DO_NOT_DESCRIBE_GOAL_INDICATOR.getDefectIndicator(), structuredScenario.getTitle(), structuredScenario.getGoal(), 
+					DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.CONCEPTUALLY_SOUNDNESS_TITLE_DO_NOT_DESCRIBE_GOAL_INDICATOR.getFixRecomendation());
+						
 			defects.add(defect)	;
 		}
 		
@@ -1500,14 +1298,11 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 							}
 						}
 						if(!existRelatedScenario) {
-							Defect defect = new Defect(); 
-							defect.setQualityProperty(QualityPropertyEnum.INTEGRITY.getQualityProperty());
-							defect.setScenarioId(structuredScenario.getId());
-							defect.setScenarioElement(ScenarioElement.CONTEXT_PRE_CONDITION.getScenarioElement());
-							defect.setIndicator(DefectIndicatorEnum.INTEGRITY_SCENARIO_PRE_CONDITION_NOT_EXIST_INDICATOR.getDefectIndicator());
-							defect.setIndicator(defect.getIndicator().replace("<indicator>", includedScenario));
-							defect.setDefectCategory(DefectCategoryEnum.ERROR.getDefectCategory());
-							defect.setFixRecomendation(DefectIndicatorEnum.INTEGRITY_SCENARIO_PRE_CONDITION_NOT_EXIST_INDICATOR.getFixRecomendation());
+							Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.CONTEXT_PRE_CONDITION.getScenarioElement(), null, 
+									QualityPropertyEnum.INTEGRITY.getQualityProperty(), 
+									DefectIndicatorEnum.INTEGRITY_SCENARIO_PRE_CONDITION_NOT_EXIST_INDICATOR.getDefectIndicator(), null, includedScenario, 
+									DefectCategoryEnum.ERROR.getDefectCategory(), DefectIndicatorEnum.INTEGRITY_SCENARIO_PRE_CONDITION_NOT_EXIST_INDICATOR.getFixRecomendation());
+							
 							defects.add(defect)	;
 						}
 					}
@@ -1532,14 +1327,11 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 							}
 						}
 						if(!existRelatedScenario) {
-							Defect defect = new Defect(); 
-							defect.setQualityProperty(QualityPropertyEnum.INTEGRITY.getQualityProperty());
-							defect.setScenarioId(structuredScenario.getId());
-							defect.setScenarioElement(ScenarioElement.CONTEXT_POST_CONDITION.getScenarioElement());
-							defect.setIndicator(DefectIndicatorEnum.INTEGRITY_SCENARIO_POST_CONDITION_NOT_EXIST_INDICATOR.getDefectIndicator());
-							defect.setIndicator(defect.getIndicator().replace("<indicator>", includedScenario));
-							defect.setDefectCategory(DefectCategoryEnum.ERROR.getDefectCategory());
-							defect.setFixRecomendation(DefectIndicatorEnum.INTEGRITY_SCENARIO_POST_CONDITION_NOT_EXIST_INDICATOR.getFixRecomendation());
+							Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.CONTEXT_POST_CONDITION.getScenarioElement(), null, 
+									QualityPropertyEnum.INTEGRITY.getQualityProperty(), 
+									DefectIndicatorEnum.INTEGRITY_SCENARIO_POST_CONDITION_NOT_EXIST_INDICATOR.getDefectIndicator(), null, includedScenario, 
+									DefectCategoryEnum.ERROR.getDefectCategory(), DefectIndicatorEnum.INTEGRITY_SCENARIO_POST_CONDITION_NOT_EXIST_INDICATOR.getFixRecomendation());
+													
 							defects.add(defect)	;
 						}
 					}
@@ -1572,15 +1364,11 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 							}
 						}
 						if(!existRelatedScenario) {
-							Defect defect = new Defect(); 
-							defect.setQualityProperty(QualityPropertyEnum.INTEGRITY.getQualityProperty());
-							defect.setScenarioId(structuredScenario.getId());
-							defect.setScenarioElement(ScenarioElement.EPISODE_SENTENCE.getScenarioElement());
-							defect.setScenarioElement(defect.getScenarioElement().replace("<id>", episodeId));
-							defect.setIndicator(DefectIndicatorEnum.INTEGRITY_SCENARIO_EPISODE_NOT_EXIST_INDICATOR.getDefectIndicator());
-							defect.setIndicator(defect.getIndicator().replace("<indicator>", includedScenario));
-							defect.setDefectCategory(DefectCategoryEnum.ERROR.getDefectCategory());
-							defect.setFixRecomendation(DefectIndicatorEnum.INTEGRITY_SCENARIO_EPISODE_NOT_EXIST_INDICATOR.getFixRecomendation());
+							Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.EPISODE_SENTENCE.getScenarioElement(), episodeId, 
+									QualityPropertyEnum.INTEGRITY.getQualityProperty(), 
+									DefectIndicatorEnum.INTEGRITY_SCENARIO_EPISODE_NOT_EXIST_INDICATOR.getDefectIndicator(), null, includedScenario, 
+									DefectCategoryEnum.ERROR.getDefectCategory(), DefectIndicatorEnum.INTEGRITY_SCENARIO_EPISODE_NOT_EXIST_INDICATOR.getFixRecomendation());
+						
 							defects.add(defect)	;
 						}
 					}
@@ -1614,15 +1402,11 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 									}
 								}
 								if(!existRelatedScenario) {
-									Defect defect = new Defect(); 
-									defect.setQualityProperty(QualityPropertyEnum.INTEGRITY.getQualityProperty());
-									defect.setScenarioId(structuredScenario.getId());
-									defect.setScenarioElement(ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement());
-									defect.setScenarioElement(defect.getScenarioElement().replace("<id>", alternativeId));
-									defect.setIndicator(DefectIndicatorEnum.INTEGRITY_SCENARIO_ALTERNATIVE_NOT_EXIST_INDICATOR.getDefectIndicator());
-									defect.setIndicator(defect.getIndicator().replace("<indicator>", includedScenario));
-									defect.setDefectCategory(DefectCategoryEnum.ERROR.getDefectCategory());
-									defect.setFixRecomendation(DefectIndicatorEnum.INTEGRITY_SCENARIO_ALTERNATIVE_NOT_EXIST_INDICATOR.getFixRecomendation());
+									Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement(), alternativeId, 
+											QualityPropertyEnum.INTEGRITY.getQualityProperty(), 
+											DefectIndicatorEnum.INTEGRITY_SCENARIO_ALTERNATIVE_NOT_EXIST_INDICATOR.getDefectIndicator(), null, includedScenario, 
+											DefectCategoryEnum.ERROR.getDefectCategory(), DefectIndicatorEnum.INTEGRITY_SCENARIO_ALTERNATIVE_NOT_EXIST_INDICATOR.getFixRecomendation());
+								
 									defects.add(defect)	;
 								}
 							}
@@ -1667,15 +1451,11 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 				}
 				//SE PRE-CONDICAO NAO E SATISFEITA POR UMA POST-CONDICAO
 				if(!existPostConditionForPreCondition) {
-
-					Defect defect = new Defect(); 
-					defect.setQualityProperty(QualityPropertyEnum.INTEGRITY.getQualityProperty());
-					defect.setScenarioId(structuredScenario.getId());
-					defect.setScenarioElement(ScenarioElement.CONTEXT_PRE_CONDITION.getScenarioElement());
-					defect.setIndicator(DefectIndicatorEnum.INTEGRITY_SCENARIO_PRE_CONDITIONS_DONOT_PERFORMED_INDICATOR.getDefectIndicator());
-					defect.setIndicator(defect.getIndicator().replace("<indicator>", preCondition));
-					defect.setDefectCategory(DefectCategoryEnum.INFO.getDefectCategory());
-					defect.setFixRecomendation(DefectIndicatorEnum.INTEGRITY_SCENARIO_PRE_CONDITIONS_DONOT_PERFORMED_INDICATOR.getFixRecomendation());
+					Defect defect = NewDefect.buildDefect(structuredScenario.getId(), ScenarioElement.CONTEXT_PRE_CONDITION.getScenarioElement(), null, 
+							QualityPropertyEnum.INTEGRITY.getQualityProperty(), 
+							DefectIndicatorEnum.INTEGRITY_SCENARIO_PRE_CONDITIONS_DONOT_PERFORMED_INDICATOR.getDefectIndicator(), null, preCondition, 
+							DefectCategoryEnum.INFO.getDefectCategory(), DefectIndicatorEnum.INTEGRITY_SCENARIO_PRE_CONDITIONS_DONOT_PERFORMED_INDICATOR.getFixRecomendation());
+				
 					defects.add(defect)	;
 				}
 
@@ -1712,16 +1492,12 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 							}
 						}
 						if(!existGeogLocation) {
-							Defect defect = new Defect(); 
-							defect.setQualityProperty(QualityPropertyEnum.COHERENCY.getQualityProperty());
-							defect.setScenarioId(structuredScenario.getId());
-							defect.setScenarioElement(ScenarioElement.CONTEXT_GEOGRAPHICAL_LOCATION.getScenarioElement());
-							defect.setIndicator(DefectIndicatorEnum.COHERENCY_GEOGRAPHICAL_LOCATIONS_RELATED_SCENARIO_NOT_IN_MAIN_SCENARIO_INDICATOR.getDefectIndicator());
-							defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", subScenario.getTitle()));
-							defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", subLocation));
-							defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", structuredScenario.getTitle()));
-							defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-							defect.setFixRecomendation(DefectIndicatorEnum.COHERENCY_GEOGRAPHICAL_LOCATIONS_RELATED_SCENARIO_NOT_IN_MAIN_SCENARIO_INDICATOR.getFixRecomendation());
+							Defect defect = NewDefect.buildDefectWithIndicators(structuredScenario.getId(), ScenarioElement.CONTEXT_GEOGRAPHICAL_LOCATION.getScenarioElement(), null, 
+									QualityPropertyEnum.COHERENCY.getQualityProperty(), 
+									DefectIndicatorEnum.COHERENCY_GEOGRAPHICAL_LOCATIONS_RELATED_SCENARIO_NOT_IN_MAIN_SCENARIO_INDICATOR.getDefectIndicator(), null, 
+									Arrays.asList(subScenario.getTitle(), subLocation, structuredScenario.getTitle()), 
+									DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.COHERENCY_GEOGRAPHICAL_LOCATIONS_RELATED_SCENARIO_NOT_IN_MAIN_SCENARIO_INDICATOR.getFixRecomendation());
+													
 							defects.add(defect)	;
 						}
 					}
@@ -1746,16 +1522,12 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 							}
 						}
 						if(!existTemporalLocation) {
-							Defect defect = new Defect(); 
-							defect.setQualityProperty(QualityPropertyEnum.COHERENCY.getQualityProperty());
-							defect.setScenarioId(structuredScenario.getId());
-							defect.setScenarioElement(ScenarioElement.CONTEXT_TEMPORAL_LOCATION.getScenarioElement());
-							defect.setIndicator(DefectIndicatorEnum.COHERENCY_TEMPORAL_LOCATIONS_RELATED_SCENARIO_NOT_IN_MAIN_SCENARIO_INDICATOR.getDefectIndicator());
-							defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", subScenario.getTitle()));
-							defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", subLocation));
-							defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", structuredScenario.getTitle()));
-							defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-							defect.setFixRecomendation(DefectIndicatorEnum.COHERENCY_TEMPORAL_LOCATIONS_RELATED_SCENARIO_NOT_IN_MAIN_SCENARIO_INDICATOR.getFixRecomendation());
+							Defect defect = NewDefect.buildDefectWithIndicators(structuredScenario.getId(), ScenarioElement.CONTEXT_TEMPORAL_LOCATION.getScenarioElement(), null, 
+									QualityPropertyEnum.COHERENCY.getQualityProperty(), 
+									DefectIndicatorEnum.COHERENCY_TEMPORAL_LOCATIONS_RELATED_SCENARIO_NOT_IN_MAIN_SCENARIO_INDICATOR.getDefectIndicator(), null, 
+									Arrays.asList(subScenario.getTitle(), subLocation, structuredScenario.getTitle()), 
+									DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.COHERENCY_TEMPORAL_LOCATIONS_RELATED_SCENARIO_NOT_IN_MAIN_SCENARIO_INDICATOR.getFixRecomendation());
+													
 							defects.add(defect)	;
 						}
 					}
@@ -1780,16 +1552,12 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 							}
 						}
 						if(existReferenceToMainScenario) {
-							Defect defect = new Defect(); 
-							defect.setQualityProperty(QualityPropertyEnum.COHERENCY.getQualityProperty());
-							defect.setScenarioId(structuredScenario.getId());
-							defect.setScenarioElement(ScenarioElement.CONTEXT_PRE_CONDITION.getScenarioElement());
-							defect.setIndicator(DefectIndicatorEnum.COHERENCY_SCENARIOS_CIRCULAR_INCLUSION_INDICATOR.getDefectIndicator());
-							defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", subScenario.getTitle()));
-							defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", ScenarioElement.CONTEXT_PRE_CONDITION.getScenarioElement()));
-							defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", structuredScenario.getTitle()));
-							defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-							defect.setFixRecomendation(DefectIndicatorEnum.COHERENCY_SCENARIOS_CIRCULAR_INCLUSION_INDICATOR.getFixRecomendation());
+							Defect defect = NewDefect.buildDefectWithIndicators(structuredScenario.getId(), ScenarioElement.CONTEXT_PRE_CONDITION.getScenarioElement(), null, 
+									QualityPropertyEnum.COHERENCY.getQualityProperty(), 
+									DefectIndicatorEnum.COHERENCY_SCENARIOS_CIRCULAR_INCLUSION_INDICATOR.getDefectIndicator(), null, 
+									Arrays.asList(subScenario.getTitle(), ScenarioElement.CONTEXT_PRE_CONDITION.getScenarioElement(), structuredScenario.getTitle()), 
+									DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.COHERENCY_SCENARIOS_CIRCULAR_INCLUSION_INDICATOR.getFixRecomendation());
+							
 							defects.add(defect)	;
 						}
 					}
@@ -1803,16 +1571,12 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 							}
 						}
 						if(existReferenceToMainScenario) {
-							Defect defect = new Defect(); 
-							defect.setQualityProperty(QualityPropertyEnum.COHERENCY.getQualityProperty());
-							defect.setScenarioId(structuredScenario.getId());
-							defect.setScenarioElement(ScenarioElement.CONTEXT_POST_CONDITION.getScenarioElement());
-							defect.setIndicator(DefectIndicatorEnum.COHERENCY_SCENARIOS_CIRCULAR_INCLUSION_INDICATOR.getDefectIndicator());
-							defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", subScenario.getTitle()));
-							defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", ScenarioElement.CONTEXT_POST_CONDITION.getScenarioElement()));
-							defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", structuredScenario.getTitle()));
-							defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-							defect.setFixRecomendation(DefectIndicatorEnum.COHERENCY_SCENARIOS_CIRCULAR_INCLUSION_INDICATOR.getFixRecomendation());
+							Defect defect = NewDefect.buildDefectWithIndicators(structuredScenario.getId(), ScenarioElement.CONTEXT_POST_CONDITION.getScenarioElement(), null, 
+									QualityPropertyEnum.COHERENCY.getQualityProperty(), 
+									DefectIndicatorEnum.COHERENCY_SCENARIOS_CIRCULAR_INCLUSION_INDICATOR.getDefectIndicator(), null, 
+									Arrays.asList(subScenario.getTitle(), ScenarioElement.CONTEXT_POST_CONDITION.getScenarioElement(), structuredScenario.getTitle()), 
+									DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.COHERENCY_SCENARIOS_CIRCULAR_INCLUSION_INDICATOR.getFixRecomendation());
+							
 							defects.add(defect)	;
 						}
 					}
@@ -1826,16 +1590,12 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 							}
 						}
 						if(existReferenceToMainScenario) {
-							Defect defect = new Defect(); 
-							defect.setQualityProperty(QualityPropertyEnum.COHERENCY.getQualityProperty());
-							defect.setScenarioId(structuredScenario.getId());
-							defect.setScenarioElement(ScenarioElement.RESOURCES.getScenarioElement());
-							defect.setIndicator(DefectIndicatorEnum.COHERENCY_SCENARIOS_CIRCULAR_INCLUSION_INDICATOR.getDefectIndicator());
-							defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", subScenario.getTitle()));
-							defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", ScenarioElement.RESOURCES.getScenarioElement()));
-							defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", structuredScenario.getTitle()));
-							defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-							defect.setFixRecomendation(DefectIndicatorEnum.COHERENCY_SCENARIOS_CIRCULAR_INCLUSION_INDICATOR.getFixRecomendation());
+							Defect defect = NewDefect.buildDefectWithIndicators(structuredScenario.getId(), ScenarioElement.RESOURCES.getScenarioElement(), null, 
+									QualityPropertyEnum.COHERENCY.getQualityProperty(), 
+									DefectIndicatorEnum.COHERENCY_SCENARIOS_CIRCULAR_INCLUSION_INDICATOR.getDefectIndicator(), null, 
+									Arrays.asList(subScenario.getTitle(), ScenarioElement.RESOURCES.getScenarioElement(), structuredScenario.getTitle()), 
+									DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.COHERENCY_SCENARIOS_CIRCULAR_INCLUSION_INDICATOR.getFixRecomendation());
+							
 							defects.add(defect)	;
 						}
 					}
@@ -1850,16 +1610,12 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 							}
 						}
 						if(existReferenceToMainScenario) {
-							Defect defect = new Defect(); 
-							defect.setQualityProperty(QualityPropertyEnum.COHERENCY.getQualityProperty());
-							defect.setScenarioId(structuredScenario.getId());
-							defect.setScenarioElement(ScenarioElement.EPISODES.getScenarioElement());
-							defect.setIndicator(DefectIndicatorEnum.COHERENCY_SCENARIOS_CIRCULAR_INCLUSION_INDICATOR.getDefectIndicator());
-							defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", subScenario.getTitle()));
-							defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", ScenarioElement.EPISODES.getScenarioElement()));
-							defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", structuredScenario.getTitle()));
-							defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-							defect.setFixRecomendation(DefectIndicatorEnum.COHERENCY_SCENARIOS_CIRCULAR_INCLUSION_INDICATOR.getFixRecomendation());
+							Defect defect = NewDefect.buildDefectWithIndicators(structuredScenario.getId(), ScenarioElement.EPISODES.getScenarioElement(), null, 
+									QualityPropertyEnum.COHERENCY.getQualityProperty(), 
+									DefectIndicatorEnum.COHERENCY_SCENARIOS_CIRCULAR_INCLUSION_INDICATOR.getDefectIndicator(), null, 
+									Arrays.asList(subScenario.getTitle(), ScenarioElement.EPISODES.getScenarioElement(), structuredScenario.getTitle()), 
+									DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.COHERENCY_SCENARIOS_CIRCULAR_INCLUSION_INDICATOR.getFixRecomendation());
+							
 							defects.add(defect)	;
 						}
 					}
@@ -1881,16 +1637,12 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 								break;
 						}
 						if(existReferenceToMainScenario) {
-							Defect defect = new Defect(); 
-							defect.setQualityProperty(QualityPropertyEnum.COHERENCY.getQualityProperty());
-							defect.setScenarioId(structuredScenario.getId());
-							defect.setScenarioElement(ScenarioElement.ALTERNATIVE.getScenarioElement());
-							defect.setIndicator(DefectIndicatorEnum.COHERENCY_SCENARIOS_CIRCULAR_INCLUSION_INDICATOR.getDefectIndicator());
-							defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", subScenario.getTitle()));
-							defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", ScenarioElement.ALTERNATIVE.getScenarioElement()));
-							defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", structuredScenario.getTitle()));
-							defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-							defect.setFixRecomendation(DefectIndicatorEnum.COHERENCY_SCENARIOS_CIRCULAR_INCLUSION_INDICATOR.getFixRecomendation());
+							Defect defect = NewDefect.buildDefectWithIndicators(structuredScenario.getId(), ScenarioElement.ALTERNATIVE.getScenarioElement(), null, 
+									QualityPropertyEnum.COHERENCY.getQualityProperty(), 
+									DefectIndicatorEnum.COHERENCY_SCENARIOS_CIRCULAR_INCLUSION_INDICATOR.getDefectIndicator(), null, 
+									Arrays.asList(subScenario.getTitle(), ScenarioElement.ALTERNATIVE.getScenarioElement(), structuredScenario.getTitle()), 
+									DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.COHERENCY_SCENARIOS_CIRCULAR_INCLUSION_INDICATOR.getFixRecomendation());
+							
 							defects.add(defect)	;
 						}
 					}
@@ -1930,52 +1682,37 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 					//Indicator: The main scenario and another scenario have similar Titles
 					int distance = distanceAlgorithm.execute(mainScenarioTitle, subScenario.getTitle().toUpperCase(), 2);
 					if (distance < 2) {
-						//Create Defect
-						Defect defect = new Defect(); 
-						defect.setQualityProperty(QualityPropertyEnum.UNIQUENESS.getQualityProperty());
-						defect.setScenarioId(structuredScenario.getId());
-						defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
-						defect.setIndicator(DefectIndicatorEnum.UNIQUENESS_SCENARIOS_TITLE_COINCIDENCE_INDICATOR.getDefectIndicator());
-						defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", structuredScenario.getTitle()));
-						defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", subScenario.getTitle()));
-						defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-						defect.setFixRecomendation(DefectIndicatorEnum.UNIQUENESS_SCENARIOS_TITLE_COINCIDENCE_INDICATOR.getFixRecomendation());
+						Defect defect = NewDefect.buildDefectWithIndicators(structuredScenario.getId(), ScenarioElement.TITLE.getScenarioElement(), null, 
+								QualityPropertyEnum.UNIQUENESS.getQualityProperty(), 
+								DefectIndicatorEnum.UNIQUENESS_SCENARIOS_TITLE_COINCIDENCE_INDICATOR.getDefectIndicator(), null, 
+								Arrays.asList(structuredScenario.getTitle(), subScenario.getTitle()), 
+								DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.UNIQUENESS_SCENARIOS_TITLE_COINCIDENCE_INDICATOR.getFixRecomendation());
+						
 						defects.add(defect)	;
 					}
 					//@Episódio 2: Check that the Goal of a scenario is not already included in another scenario; (WARNING)
 					//Indicator: The main scenario and another scenario have similar Goals
 					distance = distanceAlgorithm.execute(mainScenarioGoal, subScenario.getGoal().toUpperCase(), 2);
 					if (distance < 2) {
-						//Create Defect
-						Defect defect = new Defect(); 
-						defect.setQualityProperty(QualityPropertyEnum.UNIQUENESS.getQualityProperty());
-						defect.setScenarioId(structuredScenario.getId());
-						defect.setScenarioElement(ScenarioElement.GOAL.getScenarioElement());
-						defect.setIndicator(DefectIndicatorEnum.UNIQUENESS_SCENARIOS_GOAL_COINCIDENCE_INDICATOR.getDefectIndicator());
-						defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", structuredScenario.getTitle()));
-						defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", subScenario.getTitle()));
-						defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", structuredScenario.getGoal()));
-						defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", subScenario.getGoal()));
-						defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-						defect.setFixRecomendation(DefectIndicatorEnum.UNIQUENESS_SCENARIOS_GOAL_COINCIDENCE_INDICATOR.getFixRecomendation());
+						Defect defect = NewDefect.buildDefectWithIndicators(structuredScenario.getId(), ScenarioElement.GOAL.getScenarioElement(), null, 
+								QualityPropertyEnum.UNIQUENESS.getQualityProperty(), 
+								DefectIndicatorEnum.UNIQUENESS_SCENARIOS_GOAL_COINCIDENCE_INDICATOR.getDefectIndicator(), null, 
+								Arrays.asList(structuredScenario.getTitle(), subScenario.getTitle(), structuredScenario.getGoal(), subScenario.getGoal()), 
+								DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.UNIQUENESS_SCENARIOS_GOAL_COINCIDENCE_INDICATOR.getFixRecomendation());
+						
 						defects.add(defect)	;
 					}
-					//@Episódio 3: Check that the Context Pre-condition of a scenario is not already included in another scenario; (WARNING)
+					//@Episódio 3: Check that the Context Pre-condition of a scenario is not already included in another scenario; (INFO)
 					//Indicator: The main scenario and another scenario have similar Pre-conditions
 					if(!mainScenarioPreconditions.isEmpty()) {
 						if(subScenario.getContext().getPreConditions() != null && !subScenario.getContext().getPreConditions().isEmpty()) {
 							if(ListManipulation.isSubset(mainScenarioPreconditions, subScenario.getContext().getPreConditions() )) {
-								Defect defect = new Defect(); 
-								defect.setQualityProperty(QualityPropertyEnum.UNIQUENESS.getQualityProperty());
-								defect.setScenarioId(structuredScenario.getId());
-								defect.setScenarioElement(ScenarioElement.CONTEXT_PRE_CONDITION.getScenarioElement());
-								defect.setIndicator(DefectIndicatorEnum.UNIQUENESS_SCENARIOS_CONTEXT_PRE_CONDITIONS_COINCIDENCE_INDICATOR.getDefectIndicator());
-								defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", structuredScenario.getTitle()));
-								defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", subScenario.getTitle()));
-								defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", structuredScenario.getContext().getPreConditions().toString()));
-								defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", subScenario.getContext().getPreConditions().toString()));
-								defect.setDefectCategory(DefectCategoryEnum.INFO.getDefectCategory());
-								defect.setFixRecomendation(DefectIndicatorEnum.UNIQUENESS_SCENARIOS_CONTEXT_PRE_CONDITIONS_COINCIDENCE_INDICATOR.getFixRecomendation());
+								Defect defect = NewDefect.buildDefectWithIndicators(structuredScenario.getId(), ScenarioElement.CONTEXT_PRE_CONDITION.getScenarioElement(), null, 
+										QualityPropertyEnum.UNIQUENESS.getQualityProperty(), 
+										DefectIndicatorEnum.UNIQUENESS_SCENARIOS_CONTEXT_PRE_CONDITIONS_COINCIDENCE_INDICATOR.getDefectIndicator(), null, 
+										Arrays.asList(structuredScenario.getTitle(), subScenario.getTitle(), structuredScenario.getContext().getPreConditions().toString(), structuredScenario.getContext().getPreConditions().toString(), subScenario.getContext().getPreConditions().toString()), 
+										DefectCategoryEnum.INFO.getDefectCategory(), DefectIndicatorEnum.UNIQUENESS_SCENARIOS_CONTEXT_PRE_CONDITIONS_COINCIDENCE_INDICATOR.getFixRecomendation());
+								
 								defects.add(defect)	;
 							}
 						}
@@ -1990,17 +1727,12 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 								subScenarioEpisodeSentences.add(episode.getSentence());
 							}
 							if(ListManipulation.isSubset(mainScenarioEpisodeSentences, subScenarioEpisodeSentences )) {
-								Defect defect = new Defect(); 
-								defect.setQualityProperty(QualityPropertyEnum.UNIQUENESS.getQualityProperty());
-								defect.setScenarioId(structuredScenario.getId());
-								defect.setScenarioElement(ScenarioElement.EPISODES.getScenarioElement());
-								defect.setIndicator(DefectIndicatorEnum.UNIQUENESS_SCENARIOS_EPISODES_COINCIDENCE_INDICATOR.getDefectIndicator());
-								defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", structuredScenario.getTitle()));
-								defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", subScenario.getTitle()));
-								defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", mainScenarioEpisodeSentences.toString()));
-								defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", subScenarioEpisodeSentences.toString()));
-								defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-								defect.setFixRecomendation(DefectIndicatorEnum.UNIQUENESS_SCENARIOS_EPISODES_COINCIDENCE_INDICATOR.getFixRecomendation());
+								Defect defect = NewDefect.buildDefectWithIndicators(structuredScenario.getId(), ScenarioElement.EPISODES.getScenarioElement(), null, 
+										QualityPropertyEnum.UNIQUENESS.getQualityProperty(), 
+										DefectIndicatorEnum.UNIQUENESS_SCENARIOS_EPISODES_COINCIDENCE_INDICATOR.getDefectIndicator(), null, 
+										Arrays.asList(structuredScenario.getTitle(), subScenario.getTitle(), mainScenarioEpisodeSentences.toString(), subScenarioEpisodeSentences.toString()), 
+										DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.UNIQUENESS_SCENARIOS_EPISODES_COINCIDENCE_INDICATOR.getFixRecomendation());
+								
 								defects.add(defect)	;
 							}
 						}
@@ -2010,15 +1742,12 @@ public class CompletenessAnalysisServiceImpl implements ICompletenessAnalysisSer
 					//NLP
 					//Indicator: Syntactic Similarity: The main scenario and another scenario share the same Action-Verbs and the Direct-Objects
 					if (isSintacticallySimilar(structuredScenario.getTitleNlp(), subScenario.getTitleNlp()) == true) {
-						Defect defect = new Defect(); 
-						defect.setQualityProperty(QualityPropertyEnum.UNIQUENESS.getQualityProperty());
-						defect.setScenarioId(structuredScenario.getId());
-						defect.setScenarioElement(ScenarioElement.TITLE.getScenarioElement());
-						defect.setIndicator(DefectIndicatorEnum.UNIQUENESS_SCENARIOS_TITLE_SYNTACTIC_SAME_VERB_OBJECT_INDICATOR.getDefectIndicator());
-						defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", mainScenarioTitle));
-						defect.setIndicator(defect.getIndicator().replaceFirst("<indicator>", subScenario.getTitle().toUpperCase()));
-						defect.setDefectCategory(DefectCategoryEnum.WARNING.getDefectCategory());
-						defect.setFixRecomendation(DefectIndicatorEnum.UNIQUENESS_SCENARIOS_TITLE_SYNTACTIC_SAME_VERB_OBJECT_INDICATOR.getFixRecomendation());
+						Defect defect = NewDefect.buildDefectWithIndicators(structuredScenario.getId(), ScenarioElement.TITLE.getScenarioElement(), null, 
+								QualityPropertyEnum.UNIQUENESS.getQualityProperty(), 
+								DefectIndicatorEnum.UNIQUENESS_SCENARIOS_TITLE_SYNTACTIC_SAME_VERB_OBJECT_INDICATOR.getDefectIndicator(), null, 
+								Arrays.asList(mainScenarioTitle, subScenario.getTitle().toUpperCase()), 
+								DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.UNIQUENESS_SCENARIOS_TITLE_SYNTACTIC_SAME_VERB_OBJECT_INDICATOR.getFixRecomendation());
+						
 						defects.add(defect)	;
 					}
 					//@Episódio 6: Check the semantic similarity of a scenario (Title) with other scenarios; (WARNING)

@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,8 +15,6 @@ import pe.edu.unsa.daisi.lis.cel.domain.model.scenario.structured.StructuredEpis
 import pe.edu.unsa.daisi.lis.cel.domain.model.scenario.structured.StructuredScenario;
 import pe.edu.unsa.daisi.lis.cel.repository.IScenarioDao;
 import pe.edu.unsa.daisi.lis.cel.util.ListManipulation;
-import pe.edu.unsa.daisi.lis.cel.util.RegularExpression;
-import pe.edu.unsa.daisi.lis.cel.util.StringManipulation;
 import pe.edu.unsa.daisi.lis.cel.util.scenario.preprocess.ScenarioManipulation;
 import pe.edu.unsa.daisi.lis.cel.util.scenario.preprocess.ScenarioParser;
 
@@ -136,8 +132,6 @@ public class ScenarioServiceImpl implements IScenarioService{
 	
 	
 	public HashMap<String, List<StructuredScenario>> findSequentiallyRelatedScenarios(StructuredScenario structuredScenario, List<StructuredScenario> scenarios) {
-		
-		List<StructuredScenario> relatedScenarios = new ArrayList<StructuredScenario>();  
 		List<StructuredScenario> sortedScenarios = new ArrayList<StructuredScenario>();  
 		HashMap<String, List<StructuredScenario>> seqRelatedScenarioHashMap = new HashMap<String, List<StructuredScenario>>(); //Sequentially related scenarios by type of relationship
 		if(scenarios != null && !scenarios.isEmpty()) {
@@ -160,29 +154,7 @@ public class ScenarioServiceImpl implements IScenarioService{
 								break;
 							}			
 							
-							/*
-							String regExpTitle = RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT + relatedScenario.getTitle().toUpperCase() + RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT;
-							Pattern patternTitle = Pattern.compile(regExpTitle);
-							String context = preCondition.toUpperCase();
-							Matcher matcherTitle = patternTitle.matcher(context);
-							int startIndex = -1;
-							int endIndex = -1;
-							while(matcherTitle.find()) {
-								startIndex = matcherTitle.start();
-								endIndex = matcherTitle.end();
-								break;//firs occurrence
-							}
-							if (startIndex >= 0 && endIndex > 0) {
-								List<StructuredScenario> tmpScenarios = seqRelatedScenarioHashMap.get(PRE_CONDITION_RELATIONSHIP);
-								if(tmpScenarios == null)
-									tmpScenarios = new ArrayList<StructuredScenario>();  
-								if(!tmpScenarios.contains(relatedScenario))
-									tmpScenarios.add(relatedScenario);
-								seqRelatedScenarioHashMap.put(PRE_CONDITION_RELATIONSHIP, tmpScenarios);
-								
-								break;
-							}							
-							*/
+							
 						}
 						
 					}
@@ -203,28 +175,7 @@ public class ScenarioServiceImpl implements IScenarioService{
 								
 								break;
 							}		
-							/*
-							String regExpTitle = RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT + relatedScenario.getTitle().toUpperCase() + RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT;
-							Pattern patternTitle = Pattern.compile(regExpTitle);
-							String context = postCondition.toUpperCase();
-							Matcher matcherTitle = patternTitle.matcher(context);
-							int startIndex = -1;
-							int endIndex = -1;
-							while(matcherTitle.find()) {
-								startIndex = matcherTitle.start();
-								endIndex = matcherTitle.end();
-								break;//firs occurrence
-							}
-							if (startIndex >= 0 && endIndex > 0) {
-								List<StructuredScenario> tmpScenarios = seqRelatedScenarioHashMap.get(POST_CONDITION_RELATIONSHIP);
-								if(tmpScenarios == null)
-									tmpScenarios = new ArrayList<StructuredScenario>();  
-								if(!tmpScenarios.contains(relatedScenario))
-									tmpScenarios.add(relatedScenario);
-								seqRelatedScenarioHashMap.put(POST_CONDITION_RELATIONSHIP, tmpScenarios);
-								break;
-							}
-							*/							
+											
 						}					
 					}
 				}
@@ -245,27 +196,7 @@ public class ScenarioServiceImpl implements IScenarioService{
 								
 								break;
 							}
-							/*
-							String regExpTitle = RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT + relatedScenario.getTitle().toUpperCase() + RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT;
-							Pattern patternTitle = Pattern.compile(regExpTitle);
-							Matcher matcherTitle = patternTitle.matcher(sentence);
-							int startIndex = -1;
-							int endIndex = -1;
-							while(matcherTitle.find()) {
-								startIndex = matcherTitle.start();
-								endIndex = matcherTitle.end();
-								break;//firs occurrence
-							}
-							if (startIndex >= 0 && endIndex > 0) {
-								List<StructuredScenario> tmpScenarios = seqRelatedScenarioHashMap.get(SUB_SCENARIO_RELATIONSHIP);
-								if(tmpScenarios == null)
-									tmpScenarios = new ArrayList<StructuredScenario>();  
-								if(!tmpScenarios.contains(relatedScenario))
-									tmpScenarios.add(relatedScenario);
-								seqRelatedScenarioHashMap.put(SUB_SCENARIO_RELATIONSHIP, tmpScenarios);
-								break;
-							}	
-							*/						
+										
 						}						
 					}
 				}
@@ -287,28 +218,7 @@ public class ScenarioServiceImpl implements IScenarioService{
 										
 										break;
 									}
-									/*
-									String regExpTitle = RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT + relatedScenario.getTitle().toUpperCase() + RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT;
-									Pattern patternTitle = Pattern.compile(regExpTitle);
-									solution = solution.toUpperCase();
-									Matcher matcherTitle = patternTitle.matcher(solution);
-									int startIndex = -1;
-									int endIndex = -1;
-									while(matcherTitle.find()) {
-										startIndex = matcherTitle.start();
-										endIndex = matcherTitle.end();
-										break;//firs occurrence
-									}
-									if (startIndex >= 0 && endIndex > 0) {
-										List<StructuredScenario> tmpScenarios = seqRelatedScenarioHashMap.get(ALTERNATIVE_RELATIONSHIP);
-										if(tmpScenarios == null)
-											tmpScenarios = new ArrayList<StructuredScenario>();  
-										if(!tmpScenarios.contains(relatedScenario))
-											tmpScenarios.add(relatedScenario);
-										seqRelatedScenarioHashMap.put(ALTERNATIVE_RELATIONSHIP, tmpScenarios);
-										break;
-									}			
-									*/
+									
 									
 								}
 							}							

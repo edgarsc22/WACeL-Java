@@ -11,8 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @author Edgar
  */
 public class Node implements Serializable {
-    
-   
+       
 	
 	/**
 	 * 
@@ -30,11 +29,11 @@ public class Node implements Serializable {
     @JsonIgnore
     private boolean timed;
     private String groupName; //nodes can be grouped
-    @JsonIgnore
+  
     private Integer positionX; //To visualize in X axis
-    @JsonIgnore
+    
     private Integer positionY; //To visualize in Y axis. It is also the height of the node in the net: root(start) -> ..... -> node 
-    @JsonIgnore
+    
     private Integer orientation; //To visualize: 0 = ||, 90 = ---
     @JsonIgnore
     private List<Node> adjNodes;

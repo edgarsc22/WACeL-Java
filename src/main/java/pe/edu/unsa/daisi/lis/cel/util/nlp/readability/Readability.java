@@ -172,16 +172,16 @@ public class Readability {
 	}
 
 	private static String cleanLine(String line) {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder strBuilder = new StringBuilder();
 		for (int i = 0; i < line.length(); i++) {
 			char c = line.charAt(i);
 			if (c < 128 && Character.isLetter(c)) {
-				buffer.append(c);
+				strBuilder.append(c);
 			} else {
-				buffer.append(' ');
+				strBuilder.append(' ');
 			}
 		}
-		return buffer.toString().toLowerCase();
+		return strBuilder.toString().toLowerCase();
 	}
 
 	private static int getNumberOfSentences(String text) {

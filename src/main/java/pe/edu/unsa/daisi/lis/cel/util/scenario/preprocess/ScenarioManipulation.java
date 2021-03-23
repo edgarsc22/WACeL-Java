@@ -163,10 +163,11 @@ public class ScenarioManipulation {
 					Matcher matcherTitle = patternTitle.matcher(context);
 					int startIndex = -1;
 					int endIndex = -1;
-					while(matcherTitle.find()) {
+					
+					if(matcherTitle.find()) {
 						startIndex = matcherTitle.start();
 						endIndex = matcherTitle.end();
-						break;//firs occurrence
+					
 					}
 					if (startIndex >= 0 && endIndex > 0) {
 						StringBuilder newContext = new StringBuilder(scenario.getContext());
@@ -181,10 +182,11 @@ public class ScenarioManipulation {
 					Matcher matcherTitle = patternTitle.matcher(episodeSentence);
 					int startIndex = -1;
 					int endIndex = -1;
-					while(matcherTitle.find()) {
+					
+					if(matcherTitle.find()) {
 						startIndex = matcherTitle.start();
 						endIndex = matcherTitle.end();
-						break;//firs occurrence
+						
 					}
 					if (startIndex >= 0 && endIndex > 0) {
 						StringBuilder newEpisodes = new StringBuilder(scenario.getEpisodes());
@@ -200,10 +202,11 @@ public class ScenarioManipulation {
 					Matcher matcherTitle = patternTitle.matcher(solutionStep);
 					int startIndex = -1;
 					int endIndex = -1;
-					while(matcherTitle.find()) {
+					
+					if(matcherTitle.find()) {
 						startIndex = matcherTitle.start();
 						endIndex = matcherTitle.end();
-						break;//firs occurrence
+					
 					}
 					if (startIndex >= 0 && endIndex > 0) {
 						StringBuilder newAlternative = new StringBuilder(scenario.getAlternative());
@@ -239,10 +242,11 @@ public class ScenarioManipulation {
 		Matcher matcherTitle = patternTitle.matcher(context);
 		int startIndex = -1;
 		int endIndex = -1;
-		while(matcherTitle.find()) {
+		
+		if(matcherTitle.find()) {
 			startIndex = matcherTitle.start();
 			endIndex = matcherTitle.end();
-			break;//firs occurrence
+			
 		}
 		if (startIndex >= 0 && endIndex > 0) {
 			return true;

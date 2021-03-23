@@ -25,12 +25,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import pe.edu.unsa.daisi.lis.cel.domain.model.lexicon.LexiconTypeEnum;
 import pe.edu.unsa.daisi.lis.cel.domain.model.project.LanguageEnum;
 import pe.edu.unsa.daisi.lis.cel.domain.model.project.Project;
 import pe.edu.unsa.daisi.lis.cel.domain.model.project.ProjectUser;
 import pe.edu.unsa.daisi.lis.cel.domain.model.user.User;
-import pe.edu.unsa.daisi.lis.cel.domain.model.user.UserProfile;
 import pe.edu.unsa.daisi.lis.cel.service.IProjectService;
 import pe.edu.unsa.daisi.lis.cel.service.IUserService;
 import pe.edu.unsa.daisi.lis.cel.util.CustomUserLocal;

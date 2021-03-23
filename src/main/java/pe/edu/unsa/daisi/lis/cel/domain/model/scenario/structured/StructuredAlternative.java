@@ -23,9 +23,11 @@ public class StructuredAlternative implements Serializable {
 	private List<String> postConditions;
 	private StructuredEpisode branchingEpisode; //Alternate/Exception has a branching Episode
 	
-	private StructuredEpisode goToEpisode; //Every alternate flow must return to some specific episode of the main flow 
+	private StructuredEpisode goToEpisode; //Every alternate flow must return to some specific episode of the main flow
+	  
 	private boolean scenarioFinish = false;		   //or finish the scenario
 	private Integer solutionStepWithGoToEpisode = -1; //Must be the last step of the solution
+	private Integer solutionStepWithEndScenario = -1; //Must be the last step of the solution
 	
 	
 	private boolean ifThenFormat; //Format: IF-THEN | multi-step lines
@@ -133,6 +135,15 @@ public class StructuredAlternative implements Serializable {
 		this.solutionStepWithGoToEpisode = solutionStepWithGoToEpisode;
 	}
 
+	
+
+	public Integer getSolutionStepWithEndScenario() {
+		return solutionStepWithEndScenario;
+	}
+
+	public void setSolutionStepWithEndScenario(Integer solutionStepWithEndScenario) {
+		this.solutionStepWithEndScenario = solutionStepWithEndScenario;
+	}
 
 	public boolean isIfThenFormat() {
 		return ifThenFormat;

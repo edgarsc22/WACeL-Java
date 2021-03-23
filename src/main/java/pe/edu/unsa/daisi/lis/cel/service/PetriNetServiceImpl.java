@@ -2,7 +2,6 @@ package pe.edu.unsa.daisi.lis.cel.service;
 
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,7 +17,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -30,8 +28,8 @@ import pe.edu.unsa.daisi.lis.cel.domain.model.petrinet.ArcTypeEnum;
 import pe.edu.unsa.daisi.lis.cel.domain.model.petrinet.Node;
 import pe.edu.unsa.daisi.lis.cel.domain.model.petrinet.NodeTypeEnum;
 import pe.edu.unsa.daisi.lis.cel.domain.model.petrinet.PetriNet;
-import pe.edu.unsa.daisi.lis.cel.domain.model.scenario.structured.StructuredEpisode;
 import pe.edu.unsa.daisi.lis.cel.domain.model.scenario.structured.StructuredAlternative;
+import pe.edu.unsa.daisi.lis.cel.domain.model.scenario.structured.StructuredEpisode;
 import pe.edu.unsa.daisi.lis.cel.domain.model.scenario.structured.StructuredScenario;
 import pe.edu.unsa.daisi.lis.cel.util.scenario.preprocess.ScenarioManipulation;
 
@@ -47,14 +45,11 @@ public class PetriNetServiceImpl implements IPetriNetService {
 	private static int LARGE_INCREMENT_Y = 100;
 	private static int INCREMENT_X = 50;
 	private static int LARGE_INCREMENT_X = 200;
+	private static int DEFAULT_INITIAL_POS_X = 300;
 	private static int ORIENTATION_0 = 0;
 	private static String LABEL_COMPONENTS_DELIMITER = "_";
 	private static String LABEL_COMPONENTS_OTHER_DELIMITER = "-";
-	private List<String> lstPath = new ArrayList<>();
-	private List<List<Node>> lstPathNodes = new ArrayList<>();
-
-
-
+	
 
 	public PetriNet transformScenario(StructuredScenario scenario, int initialPositionX, int initialPositionY) {
 		Integer countDummyPlaces = 0;
@@ -768,11 +763,13 @@ public class PetriNetServiceImpl implements IPetriNetService {
 		//Find last transition generated form the last Episode;
 		//Create Output Places from Post-conditions and link to last transition generated from the last episode
 		currentPositionY = currentPositionY + INCREMENT_Y;
+		currentPositionY = lastTransitionEpisode.getPositionY();
 		for(String postCondition : scenario.getContext().getPostConditions()) {
 			Node node = new Node(postCondition, postCondition, ScenarioElement.CONTEXT_POST_CONDITION.getScenarioElement(), NodeTypeEnum.PLACE);
 			currentPositionX = currentPositionX + INCREMENT_X;
 			node.setPositionX(currentPositionX);
-			node.setPositionY(lastTransitionEpisode.getPositionY());
+			node.setPositionY(currentPositionY);
+			currentPositionY = currentPositionY + SMALL_INCREMENT_Y;
 			//IF there exist a place with same name THEN Fuse Places
 			Node oldNode = petriNet.findPlaceByNameWithTracePrePostCondition( node.getName());
 			if(oldNode == null) {
@@ -865,6 +862,9 @@ public class PetriNetServiceImpl implements IPetriNetService {
 				Node transitionFirstSolution = null;//First Transition
 				Node transitionLastSolution = null;//Last Transition
 				Node transitionPrevSolution = null;//Previous to Current Transition
+				Node transitionGoToSolution = null;//Transition (solution step) with GOTO
+				Node transitionFinishSolution = null;//Transition (solution step) wich ends the alternative
+				
 				//Initial Positions
 				if(branchingEpisodeTransition != null) {
 					currentPositionX = initialPositionX + INCREMENT_X + branchingEpisodeTransition.getAdjNodes().size()*INCREMENT_X;
@@ -901,9 +901,16 @@ public class PetriNetServiceImpl implements IPetriNetService {
 						petriNet.setMaxPositionY(currentPositionY);
 					}
 					transitionSolution = petriNet.addNode( transitionSolution);
+					//GOTO transition
+					if(indexSolution == alternative.getSolutionStepWithGoToEpisode())
+						transitionGoToSolution = transitionSolution;
+					//End scenario transition
+					if(indexSolution == alternative.getSolutionStepWithEndScenario())
+						transitionFinishSolution = transitionSolution;
 					countTransitions++;
 					//New Positions
 					currentPositionX = currentPositionX + 2*INCREMENT_X;
+					currentPositionY = currentPositionY + SMALL_INCREMENT_Y;
 
 					//Create a transition-solution-first from alternative first-solution
 					if(indexSolution == 1) {
@@ -1030,19 +1037,26 @@ public class PetriNetServiceImpl implements IPetriNetService {
 
 				//Link transition-solution-last to GO_TO Input Dummy Place of episode
 				if(goToEpisodeTransition != null) {
-
-					//Link transition-solution-last to input dummy place of GO_TO episode
-					arc = new Arc(ArcTypeEnum.ARC, transitionLastSolution, goToEpisodeInputDummyPlace);
-					arc = petriNet.addArc( arc);
-
+					//Link transition-solution-(-step) with GO-TO to input dummy place of GO_TO episode
+					if(transitionGoToSolution != null) {
+						arc = new Arc(ArcTypeEnum.ARC, transitionGoToSolution, goToEpisodeInputDummyPlace);
+						arc = petriNet.addArc( arc);
+					} else {
+						arc = new Arc(ArcTypeEnum.ARC, transitionLastSolution, goToEpisodeInputDummyPlace);
+						arc = petriNet.addArc( arc);
+					}
 				}
 				
 				//Link transition-solution-last to LAST Input Dummy Place of FINAL transition
 				if(alternative.isScenarioFinish()) {
-
 					//Link transition-solution-last to input dummy place of FINAL transition
-					arc = new Arc(ArcTypeEnum.ARC, transitionLastSolution, currentNode);
-					arc = petriNet.addArc( arc);
+					if(transitionFinishSolution != null) {
+						arc = new Arc(ArcTypeEnum.ARC, transitionFinishSolution, currentNode);
+						arc = petriNet.addArc( arc);
+					} else {
+						arc = new Arc(ArcTypeEnum.ARC, transitionLastSolution, goToEpisodeInputDummyPlace);
+						arc = petriNet.addArc( arc);
+					}
 
 				}
 
@@ -1056,7 +1070,7 @@ public class PetriNetServiceImpl implements IPetriNetService {
 	public PetriNet integratePetriNetsFromMainScenario(StructuredScenario mainScenario, HashMap<String, List<StructuredScenario>> sequentiallyRelatedScenariosHashMap, HashMap<String, List<StructuredScenario>> nonSeqRelatedScenarioHashMap) {
 
 		//Derive a Petri-Net IPN from the main scenario S;
-		PetriNet mainPetriNet = transformScenario(mainScenario, 300, INCREMENT_Y);
+		PetriNet mainPetriNet = transformScenario(mainScenario, DEFAULT_INITIAL_POS_X, INCREMENT_Y);
 		/*
 		//Identify sequentially related scenarios from the main scenario S;
 		List<Scenario> scenarios = scenarioService.findScenariosByProjectId(mainScenario.getProjectId());
@@ -1424,8 +1438,6 @@ public class PetriNetServiceImpl implements IPetriNetService {
 	}
 
 	public String createPNML(PetriNet petriNet) {
-		String title = petriNet.getName().trim().replace(" ","");
-		String filePath = title+".pnml";
 		try {
 			DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
@@ -1470,7 +1482,7 @@ public class PetriNetServiceImpl implements IPetriNetService {
 					//guardar nodo
 				}
 				else {//TRANSITIONS
-					System.out.println(node.getType().name());
+					
 					createXmlElementFromNodeTransition(net, document, node);
 				}
 			}

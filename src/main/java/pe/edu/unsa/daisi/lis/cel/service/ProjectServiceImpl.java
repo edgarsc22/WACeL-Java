@@ -2,14 +2,12 @@ package pe.edu.unsa.daisi.lis.cel.service;
 
 import java.util.Calendar;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import pe.edu.unsa.daisi.lis.cel.domain.model.project.Project;
-import pe.edu.unsa.daisi.lis.cel.domain.model.project.ProjectUser;
 import pe.edu.unsa.daisi.lis.cel.repository.IProjectDao;
 
 @Service("projectService")

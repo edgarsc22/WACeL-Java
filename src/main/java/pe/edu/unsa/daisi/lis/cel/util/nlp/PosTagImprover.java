@@ -31,7 +31,7 @@ public final class PosTagImprover {
 	private static String getPosTagsAsString(List<CustomToken> tokens, int start, int end) {
 		//Pos tags
 		int currentElement = 0;
-		StringBuffer tags = new StringBuffer("");
+		StringBuilder tags = new StringBuilder("");
 		if(start >= 0 && end <= tokens.size() && start <= end) {
 			for(int i = start; i < end; i++) {
 	    		CustomToken token = tokens.get(i) ;
@@ -139,7 +139,7 @@ public final class PosTagImprover {
 	* @Resource: tokens, SpecialVerb.NOUNS_AND_VERBS_HASH
 	**/
 	public static List<CustomToken> adjustNounPosTags(List<CustomToken> tokens){ 
-		List<CustomToken> nouns = new ArrayList<>(); //filtered nouns
+		
 		List<CustomToken> allNouns = new ArrayList<>(); 
 
 		if (tokens != null && !tokens.isEmpty()) {
@@ -243,8 +243,6 @@ public final class PosTagImprover {
 				if(SpecialVerb.NOUNS_AND_VERBS_HASH.containsKey(noun.getStem())) {
 					//WHEN
 					//Previous Tokens (contains POS tags:)
-					String REGEX_PREV_POS_TAGS = "";
-					String prevPOSs =   getPosTagsAsString(tokens, 0, noun.getIndex());
 					//Next Tokens (contains POS tags:)
 					String REGEX_NEXT_POS_TAGS = "^(VBG).*";
 					String nextPOSs =   getPosTagsAsString(tokens, noun.getIndex()+1, tokens.size());
@@ -268,8 +266,6 @@ public final class PosTagImprover {
 					String REGEX_PREV_POS_TAGS = ".*((VB|VBZ|VBP|VBD|VBN)(\\s+(PDT|DT))?(\\s+(NN.?|JJ.?))*)$";
 					String prevPOSs =   getPosTagsAsString(tokens, 0, noun.getIndex());
 					//Next Tokens (contains POS tags:)
-					String REGEX_NEXT_POS_TAGS = "";
-					String nextvPOSs =   getPosTagsAsString(tokens, noun.getIndex()+1, tokens.size());
 					if(prevPOSs.matches(REGEX_PREV_POS_TAGS)) {
 						//THEN (Adjust Token)
 						if(noun.getIndex() -1 > 0 && tokens.get(noun.getIndex() - 1) != null) {
@@ -443,8 +439,7 @@ public final class PosTagImprover {
 	**/
 	public static List<CustomToken> adjustVerbPosTags(List<CustomToken> tokens){ 
 		List<CustomToken> allVerbs = new ArrayList<>();
-		List<CustomToken> verbs = new ArrayList<>(); //filtered verbs
-
+		
 		if (tokens != null && !tokens.isEmpty()) {
 			//Get all verbs 
 			for(int i = 0; i < tokens.size(); i++ ){
@@ -467,8 +462,6 @@ public final class PosTagImprover {
 					String REGEX_PREV_POS_TAGS = ".*(DT|PDT|IN|POS|PRP\\$|JJ.?)$";
 					String prevPOSs = getPosTagsAsString(tokens, 0, verb.getIndex());
 					//Next Tokens (contains POS tags:)
-					String REGEX_NEXT_POS_TAGS = ""; 
-					String nextPOSs =  getPosTagsAsString(tokens, verb.getIndex()+1, tokens.size());
 					if(prevPOSs.matches(REGEX_PREV_POS_TAGS) ) {
 						//THEN (Adjust Token)
 						tokens.get(verb.getIndex()).setConfirmedNoun(true);
@@ -543,8 +536,6 @@ public final class PosTagImprover {
 				if(SpecialVerb.NOUNS_AND_VERBS_HASH.containsKey(verb.getStem())) {
 					//WHEN
 					//Previous Tokens (contains POS tags:)
-					String REGEX_PREV_POS_TAGS = "";
-					String prevPOSs = getPosTagsAsString(tokens, 0, verb.getIndex());
 					//Next Tokens (contains POS tags:)
 					String REGEX_NEXT_POS_TAGS = "^(IN|VB.?).*"; 
 					String nextPOSs =  getPosTagsAsString(tokens, verb.getIndex()+1, tokens.size());
@@ -740,8 +731,6 @@ public final class PosTagImprover {
 					String REGEX_PREV_POS_TAGS = ".*(DT|PDT|IN|POS|PRP\\$|JJ.?)$";
 					String prevPOSs = getPosTagsAsString(tokens, 0, verb.getIndex());
 					//Next Tokens (contains POS tags:)
-					String REGEX_NEXT_POS_TAGS = ""; 
-					String nextPOSs =  getPosTagsAsString(tokens, verb.getIndex()+1, tokens.size());
 					if(prevPOSs.matches(REGEX_PREV_POS_TAGS) ) {
 						//THEN (Adjust Token)
 						tokens.get(verb.getIndex()).setConfirmedAdjective(true);
@@ -785,8 +774,6 @@ public final class PosTagImprover {
 					String REGEX_PREV_POS_TAGS = ".*(DT|PDT|JJ.?|IN)$";
 					String prevPOSs = getPosTagsAsString(tokens, 0, verb.getIndex());
 					//Next Tokens (contains POS tags:)
-					String REGEX_NEXT_POS_TAGS = ""; 
-					String nextPOSs =  getPosTagsAsString(tokens, verb.getIndex()+1, tokens.size());
 					if(prevPOSs.matches(REGEX_PREV_POS_TAGS)) {
 						//THEN (Adjust Token)
 						if(!tokens.get(allVerbs.get(i).getIndex() - 1).getPosTag().equals(PosTagEnum.IN.name()) && !verb.getPosTag().equals(PosTagEnum.VBG.name())) {

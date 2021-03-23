@@ -1,23 +1,21 @@
 package pe.edu.unsa.daisi.lis.cel.util.nlp;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.core.io.ClassPathResource;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import opennlp.tools.tokenize.TokenizerME;
-import opennlp.tools.tokenize.TokenizerModel;
-import opennlp.tools.util.Sequence;
-import opennlp.tools.util.Span;
-import pe.edu.unsa.daisi.lis.cel.util.nlp.dictionary.english.SpecialVerb;
-import opennlp.tools.postag.POSModel;
-import opennlp.tools.postag.POSTaggerME;
 import opennlp.tools.chunker.ChunkerME;
 import opennlp.tools.chunker.ChunkerModel;
 import opennlp.tools.lemmatizer.DictionaryLemmatizer;
+import opennlp.tools.postag.POSModel;
+import opennlp.tools.postag.POSTaggerME;
+import opennlp.tools.tokenize.TokenizerME;
+import opennlp.tools.tokenize.TokenizerModel;
+import opennlp.tools.util.Span;
 /**
  * OpenNLP 
  * Singleton Pattern
@@ -146,6 +144,8 @@ public class OpenNLPAnalyzer implements INLPAnalyzer {
 		}
 		//Add chunk Information
 		for(int i = 0; i < chunks.length; i++) {
+			if(tokens == null)
+				break;
 			tokens.get(i).setChunkTag(chunks[i].toString());
 		}
 		//Tokens with Chunk Info
@@ -266,7 +266,7 @@ public class OpenNLPAnalyzer implements INLPAnalyzer {
 		private static String getChunksAsString(List<CustomToken> chunks, int start, int end) {
 			//Pos tags
 			int currentElement = 0;
-			StringBuffer tags = new StringBuffer("");
+			StringBuilder tags = new StringBuilder("");
 			if(start >= 0 && end <= chunks.size() && start <= end) {
 				for(int i = start; i < end; i++) {
 		    		CustomToken token = chunks.get(i) ;

@@ -5,7 +5,6 @@ package pe.edu.unsa.daisi.lis.cel.view;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -14,10 +13,8 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import pe.edu.unsa.daisi.lis.cel.domain.model.lexicon.Lexicon;
 import pe.edu.unsa.daisi.lis.cel.domain.model.petrinet.PetriNet;
 import pe.edu.unsa.daisi.lis.cel.domain.model.scenario.Scenario;
 import pe.edu.unsa.daisi.lis.cel.domain.model.scenario.structured.StructuredScenario;

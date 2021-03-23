@@ -4,7 +4,6 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,7 +12,6 @@ import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.TokenizerFactory;
-import edu.stanford.nlp.simple.Document;
 import edu.stanford.nlp.simple.Sentence;
 import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.GrammaticalRelation;
@@ -818,8 +816,8 @@ public class CoreNLPAnalyzer implements INLPAnalyzer {
 						// remove subject from Subjects and PUT into ModifierSubjects
 						if (subject != null && !subject.isEmpty() ) {
 							CustomToken modifierSubjectToken = null;
-							if(subjectTokens.containsKey(new Integer(subjectIndex))) {
-								modifierSubjectToken = subjectTokens.remove(new Integer(subjectIndex));
+							if(subjectTokens.containsKey(Integer.parseInt(subjectIndex))) {
+								modifierSubjectToken = subjectTokens.remove(Integer.parseInt(subjectIndex));
 								modifierSubjectTokens.put(modifierSubjectToken.getIndex(), modifierSubjectToken);
 							}
 						}

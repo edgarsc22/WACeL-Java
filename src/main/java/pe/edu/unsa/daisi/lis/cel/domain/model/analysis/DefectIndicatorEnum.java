@@ -57,8 +57,9 @@ public enum DefectIndicatorEnum implements Serializable{
 	SIMPLICITY_EPISODE_NESTED_SENTENCE_INDICATOR("<i>More than one Episode-Sentence inside a nested IF structure</i> {<b><i><indicator></i></b>}", "<i>Create a new scenario and extract the sequence to it, or It should be in a separate Alternate/Exception flow section</i>"),
 	SIMPLICITY_ALTERNATIVE_COMPLICATED_SOLUTION_INDICATOR("<i>The Alternate/Exception <mark><sentence></mark> has too many steps (more than 3) {<b> <i><i><indicator></i></b>}", "<i>Extract the sequence to a separated scenario</i>"),
 	
-	SIMPLICITY_ALTERNATIVE_GOTO_NOT_IN_LAST_ALTERNATE_SOLUTION_STEP_INDICATOR("<i>The Alternate <mark><sentence></mark> does not return to the main flow in the last solution step {solution step <b> <i><i><indicator></i></b>}", "<i>Move the solution step with <b>GO TO</b> to the last</i>"),
-	SIMPLICITY_ALTERNATIVE_GOTO_WITHOUT_EPISODE_IN_ALTERNATE_SOLUTION_STEP_INDICATOR("<i>The Alternate <mark><sentence></mark> returns to the main flow using an invalid episode Id/Step {solution step <b> <i><i><indicator></i></b>}", "<i>Inform a valid episode Id/Step</i>"),
+	SIMPLICITY_ALTERNATIVE_GOTO_NOT_IN_LAST_ALTERNATE_SOLUTION_STEP_INDICATOR("<i>The Alternativee <mark><sentence></mark> does not return to the main flow in the last solution step {solution step <b> <i><i><indicator></i></b>}", "<i>Move the solution step with <b>GO TO</b> to the last</i>"),
+	SIMPLICITY_ALTERNATIVE_GOTO_WITHOUT_EPISODE_IN_ALTERNATE_SOLUTION_STEP_INDICATOR("<i>The Alternativee <mark><sentence></mark> returns to the main flow using an invalid episode Id/Step {solution step <b> <i><i><indicator></i></b>}", "<i>Inform a valid episode Id/Step</i>"),
+	SIMPLICITY_ALTERNATIVE_END_NOT_IN_LAST_ALTERNATE_SOLUTION_STEP_INDICATOR("<i>The Alternative <mark><sentence></mark> does not finish the scenario in the last solution step {solution step <b> <i><i><indicator></i></b>}", "<i>Move the solution step which <b>ENDS or FINISHES</b> the scenario to the last</i>"),
 	
 	UNIFORMITY_MISSING_TITLE_INDICATOR("Missing <i>Title</i>", "<i>Inform the Title</i>"),
 	UNIFORMITY_MISSING_GOAL_INDICATOR("Missing <i>Goal</i>", "<i>Inform the Goal</i>"),
@@ -81,7 +82,7 @@ public enum DefectIndicatorEnum implements Serializable{
 	USEFULNES_ALTERNATIVE_WITHOUT_BRANCHING_EPISODE_INDICATOR("Branching Episode of <i>Alternative</i> is missing", "<i>Update the alternative Id/StepRef to appoint the correct episode</i>"),
 	USEFULNES_EPISODES_NOT_BETWEEN_3_AND_9_INDICATOR("Number of episodes in current scenario is <i>less than 3 or more than 9</i> {<b><i><indicator></i></b>}", "<i>Re-write the scenario to keep between 3 and 9 episodes</i>"),
 	
-	CONCEPTUALLY_SOUNDNESS_TITLE_DO_NOT_DESCRIBE_GOAL_INDICATOR("The <i>Title</i> {<b><i><indicator></i></b>} does not describe the <i>Goal</i> {<b><i><indicator></i></b>}, the corresponding verbs and objects are not the same", "<i>Re-write the Title to satisfy the Goal</i>"),
+	CONCEPTUALLY_SOUNDNESS_TITLE_DO_NOT_DESCRIBE_GOAL_INDICATOR("The <i>Title</i> {<b><i><sentence></i></b>} does not describe the <i>Goal</i> {<b><i><indicator></i></b>}, the corresponding verbs and objects are not the same", "<i>Re-write the Title to satisfy the Goal</i>"),
 	CONCEPTUALLY_SOUNDNESS_EPISODES_DO_NOT_SATISFY_GOAL_INDICATOR("The set of episodes does not satisfy the <i>Goal</i>", "<i>Re-write the set of episodes to satisfy the Goal, or vice-versa</i>"),	//difficult to implement
 	
 	CONCEPTUALLY_SOUNDNESS_EPISODE_MISSING_ACTION_VERB_INDICATOR("Missing <i>Action-Verb</i> in the sentence {<b><i><indicator></i></b>}</b>", "<i>Inform an Action-Verb in the present simple tense and active form</i>"),
