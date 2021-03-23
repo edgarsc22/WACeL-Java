@@ -27,7 +27,7 @@ The C&L supports the most existing scenario and use case templates and enables a
 Figure below shows the high-level ﬂow of information through our approach (implemented in the C&L tool). 
 
   ##### C&L Architecture: Information Flow
-<img src="https://github.com/edgarsc22/WACeL-Java/blob/master/doc/gui/information_flow.png" width="700">
+<img src="https://github.com/edgarsc22/WACeL-Java/blob/master/doc/gui/information_flow.png" width="400">
     
 
 C&L employs: 
