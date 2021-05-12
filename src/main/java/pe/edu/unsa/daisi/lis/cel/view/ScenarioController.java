@@ -124,7 +124,7 @@ public class ScenarioController  extends GenericController{
 		scenarioService.saveScenario(scenario);
 		model.addAttribute("success", messageSource.getMessage("scenario.add.success.message", new String[]{scenario.getTitle()}, CustomUserLocal.getCurrentUserLocal()));
 		return "redirect:/home/mainPage";
-		//return "redirect:/scenario/list";
+		
 	}
 
 
@@ -165,7 +165,7 @@ public class ScenarioController  extends GenericController{
 		scenarioService.updateScenario(scenario);
 		model.addAttribute("success", messageSource.getMessage("scenario.update.success.message", new String[]{scenario.getTitle()}, CustomUserLocal.getCurrentUserLocal()));
 		return "redirect:/home/mainPage";
-		//return "redirect:/scenario/list";
+		
 	}
 		
 		
@@ -177,7 +177,7 @@ public class ScenarioController  extends GenericController{
 		scenarioService.deleteScenarioById(id);
 		model.addAttribute("success", messageSource.getMessage("scenario.remove.success.message", new String[]{title}, CustomUserLocal.getCurrentUserLocal()));
 		return "redirect:/home/mainPage";
-		//return "redirect:/scenario/list";
+		
 		
 	}
 	
