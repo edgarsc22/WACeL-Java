@@ -1061,6 +1061,11 @@ public class PetriNetServiceImpl implements IPetriNetService {
 				}
 
 			}
+			//ALTERNATIVE WITHOUT SOLUTION
+			/*
+			 * else {
+			 * }
+			 */
 		}
 
 		return petriNet;
