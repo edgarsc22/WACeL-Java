@@ -43,8 +43,11 @@ var paper = new joint.dia.Paper({
 //Create Petri net
 var pn = joint.shapes.pn;
 
+//Save transitions for firing
+var jsonTransitionsHappyPath = [];
+
 /*Dynamic petri net creation*/
-function createPlace(id, text, pos_x, pos_y, tokens) {
+function createPlace(id, label, pos_x, pos_y, tokens) {
 	var pNode = new pn.Place();
 	//common attributes
 	pNode.attr('.label/fill', '#7c68fc')
@@ -56,20 +59,20 @@ function createPlace(id, text, pos_x, pos_y, tokens) {
 	
 	pNode.attr('.root/stroke', '#9586fd');
 	pNode.attr('.root/stroke-width', 2);
-	pNode.attr('.tokens > circle/fill', '#7a7e9b');
+	pNode.attr('.tokens > circle/fill', '#b6092e');
 	
 	pNode.size(30, 30);
 	
 	//specific attributes
 	pNode.set('id', id);
-	pNode.attr('.label/text', text);
+	pNode.attr('.label/text', label);
 	pNode.position(pos_x, pos_y);
 	pNode.set('tokens', tokens);
 	
 	return pNode;
 }
 
-function createTransition(id, text, pos_x, pos_y, orientation) {
+function createTransition(id, label, pos_x, pos_y, orientation) {
 	var pNode = new pn.Transition();
 	//common attributes
 	pNode.attr('.label/fill', '#fe854f')
@@ -90,7 +93,7 @@ function createTransition(id, text, pos_x, pos_y, orientation) {
 		pNode.size(30, 10);
 	//specific attributes
 	pNode.set('id', id);
-	pNode.attr('.label/text', text);
+	pNode.attr('.label/text', label);
 	pNode.position(pos_x, pos_y);
 	
 	return pNode;
@@ -106,7 +109,7 @@ function createTransition(id, text, pos_x, pos_y, orientation) {
  * @param parent_group main group
  * @returns
  */
-function createGroup(id, text, pos_x, pos_y, parent_group, width, height) {
+function createGroup(id, label, pos_x, pos_y, parent_group, width, height) {
 	var group;
 	if(parent_group == true) 
 		group = new joint.shapes.devs.Coupled();
@@ -134,7 +137,7 @@ function createGroup(id, text, pos_x, pos_y, parent_group, width, height) {
 	group.size(width, height);
 	
 	group.set('id', id);
-	group.attr('.label/text', text);
+	group.attr('.label/text', label);
 	group.position(pos_x, pos_y);
 	
 	return group;
@@ -191,7 +194,6 @@ function linkById(a_id, b_id) {
 }
 
 //Petri Net Simulation
-/*
 function fireTransition(t, sec) {
 
     var inbound = graph.getConnectedLinks(t, { inbound: true });
@@ -225,7 +227,7 @@ function fireTransition(t, sec) {
             });
 
             links.forEach(function(l) {
-                var token = V('circle', { r: 5, fill: '#feb662' });
+                var token = V('circle', { r: 7, fill: '#feb662' });
                 l.findView(paper).sendToken(token, sec * 1000);
             });
         });
@@ -237,7 +239,7 @@ function fireTransition(t, sec) {
             });
 
             links.forEach(function(l) {
-                var token = V('circle', { r: 5, fill: '#feb662' });
+                var token = V('circle', { r: 7, fill: '#b6092e' });
                 l.findView(paper).sendToken(token, sec * 1000, function() {
                     p.set('tokens', p.get('tokens') + 1);
                 });
@@ -246,9 +248,9 @@ function fireTransition(t, sec) {
     }
 }
 
-function simulate() {
+function simulateHappyPath() {
 
-    var transitions = [pProduce, pSend, cAccept, cConsume];
+    var transitions = jsonTransitionsHappyPath;
     transitions.forEach(function(t) {
         if (Math.random() < 0.7) {
             fireTransition(t, 1);
@@ -261,15 +263,15 @@ function simulate() {
                 fireTransition(t, 1);
             }
         });
-    }, 2000);
+    }, 1000);
 }
-
-var simulationId = simulate();
 
 function stopSimulation(simulationId) {
     clearInterval(simulationId);
 }
-*/
+
+//var simulationId = simulate();
+
 
 
 
@@ -314,6 +316,11 @@ function show_petri_net(scenario_id){
 			    
 			    download(filename, text);
 			}, false);
+			
+			// Simulate Petri Net.
+			document.getElementById("simBtnPN").addEventListener("click", function(){
+			    simulateHappyPath();
+			}, false);
 
 			// JAX-RS serializes an empty list as null, and a 'collection of one' as an object (not an 'array of one')
 			var list_nodes = data.nodes == null ? [] : (data.nodes instanceof Array ? data.nodes : [data.nodes]);
@@ -340,7 +347,11 @@ function show_petri_net(scenario_id){
 				else if (type_node == "TRANSITION" || type_node == "TRANSITION_ALTERNATIVE") {
 					var transition = createTransition(id_node, name_node, pos_x_node, pos_y_node, orientation_node);
 					jsonNodes.push(transition);
-					
+					if (type_node == "TRANSITION") {
+						var pNode = new pn.Transition();
+						pNode.set('id', transition.id);
+						jsonTransitionsHappyPath.push(pNode);
+					}
 				}
 
 			});
@@ -419,6 +430,12 @@ function show_integrated_petri_net(project_id, scenario_id){
 			    download(filename, text);
 			}, false);
 			
+			// Simulate Petri Net.
+			document.getElementById("simBtnPN").addEventListener("click", function(){
+			    simulateHappyPath();
+			}, false);
+
+			
 			// JAX-RS serializes an empty list as null, and a 'collection of one' as an object (not an 'array of one')
 			var list_nodes = data.nodes == null ? [] : (data.nodes instanceof Array ? data.nodes : [data.nodes]);
 			num_nodes = list_nodes.length;
@@ -476,6 +493,8 @@ function show_integrated_petri_net(project_id, scenario_id){
 				} else if (type_node == "TRANSITION" || type_node == "TRANSITION_ALTERNATIVE") {
 					var transition = createTransition(id_node, name_node, pos_x_node, pos_y_node, orientation_node);
 					jsonNodes.push(transition);
+					if (type_node == "TRANSITION")
+						jsonTransitionsHappyPath.push(transition);
 					//Add transition to corresponding group
 					if ((typeof(group_name) != undefined || group_name != null || group_name != "") && group_name.length > 0) {
 						var group = findNodeById(group_name, jsonGroupNodes);
@@ -497,6 +516,7 @@ function show_integrated_petri_net(project_id, scenario_id){
 				}
 
 			});
+			
 			//Concatenate nodes and group-nodes
 			jsonNodes = jsonGroupNodes.concat(jsonNodes);
 			

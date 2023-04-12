@@ -51,7 +51,11 @@
 				<td align="left">
 					<input type="button" id="dwnBtnPN" value='<fmt:message key="petrinet.show.form.download"> </fmt:message>'/>
 				</td>
+				<td align="left">
+					<input type="button" id="simBtnPN" value='<fmt:message key="petrinet.show.form.simulate"> </fmt:message>'/>
+				</td>
 			</tr>
+			
 		</table>
 
 		
