@@ -347,8 +347,11 @@ function show_petri_net(scenario_id){
 				else if (type_node == "TRANSITION" || type_node == "TRANSITION_ALTERNATIVE") {
 					var transition = createTransition(id_node, name_node, pos_x_node, pos_y_node, orientation_node);
 					jsonNodes.push(transition);
-					if (type_node == "TRANSITION")
-						jsonTransitionsHappyPath.push(transition);
+					if (type_node == "TRANSITION") {
+						var pNode = new pn.Transition();
+						pNode.set('id', transition.id);
+						jsonTransitionsHappyPath.push(pNode);
+					}
 				}
 
 			});
