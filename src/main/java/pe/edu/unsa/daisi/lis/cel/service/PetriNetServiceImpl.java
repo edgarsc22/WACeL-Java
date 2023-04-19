@@ -1060,12 +1060,93 @@ public class PetriNetServiceImpl implements IPetriNetService {
 
 				}
 
+			} else {
+				//Initial Positions
+				if(branchingEpisodeTransition != null) {
+					currentPositionX = initialPositionX + INCREMENT_X + branchingEpisodeTransition.getAdjNodes().size()*INCREMENT_X;
+					currentPositionY = branchingEpisodeTransition.getPositionY() + branchingEpisodeOutDummyPlace.getAdjNodes().size()*INCREMENT_Y
+							+ (branchingEpisodeOutDummyPlace.getAdjNodes().size() - 1)*INCREMENT_Y;
+				} else {
+					currentPositionX = initialPositionX + 2*INCREMENT_X;
+					currentPositionY = currentPositionY + LARGE_INCREMENT_Y;
+				}
+
+
+				int indexSolution = 1;
+				String alternativeSolutionLabel =  "NULL";
+
+				Node dummyTransitionSolution = new Node("UNHANDLED",
+						scenario.getId() +LABEL_COMPONENTS_DELIMITER+ NodeTypeEnum.TRANSITION_ALTERNATIVE.getAcronym() + LABEL_COMPONENTS_DELIMITER + alternativeId + LABEL_COMPONENTS_OTHER_DELIMITER + indexSolution + LABEL_COMPONENTS_DELIMITER + alternativeSolutionLabel,
+						ScenarioElement.ALTERNATIVE_SOLUTION.getScenarioElement().replace("<id>", alternativeId), NodeTypeEnum.TRANSITION_ALTERNATIVE);
+			
+				
+				//POSITIONS
+				dummyTransitionSolution.setPositionX(currentPositionX);
+				dummyTransitionSolution.setPositionY(currentPositionY);
+				dummyTransitionSolution.setOrientation(ORIENTATION_0);
+				dummyTransitionSolution.setDummy(true);
+				//Update Global Positions
+				if(branchingEpisodeTransition != null) {
+					if(petriNet.getMaxPositionX() < dummyTransitionSolution.getPositionX())
+						petriNet.setMaxPositionX(dummyTransitionSolution.getPositionX());
+					//update Y position of nodes after current transition-first-solution
+					if(indexSolution == 1) {
+						if(branchingEpisodeOutDummyPlace.getAdjNodes().size() >= 2) {
+							petriNet = updateNodesPositionY(petriNet, dummyTransitionSolution.getPositionY() - INCREMENT_Y, 2*INCREMENT_Y);
+							//Update Max Y Position?
+						}
+					}
+				} else {
+					petriNet.setMaxPositionY(currentPositionY);
+				}
+				dummyTransitionSolution = petriNet.addNode( dummyTransitionSolution);
+
+				//Create Input Places from Causes and Link to dummy transition-solution-first
+				currentPositionX = dummyTransitionSolution.getPositionX();
+				if(alternative.getCauses() != null && !alternative.getCauses().isEmpty()) {
+					for(String cause : alternative.getCauses()) {
+						if(cause != null && !cause.isEmpty()) {
+							Node node = new Node(cause, cause, ScenarioElement.ALTERNATIVE_CAUSE.getScenarioElement().replace("<id>", alternativeId), NodeTypeEnum.PLACE_WITH_TOKEN);
+							node.setPositionX(currentPositionX);
+							node.setPositionY(dummyTransitionSolution.getPositionY() - INCREMENT_Y);
+							node.setTokens(1);
+							node = petriNet.addNode( node);
+							if(petriNet.getMaxPositionX() < node.getPositionX())
+								petriNet.setMaxPositionX(node.getPositionX());
+							currentPositionX = node.getPositionX() + INCREMENT_X;
+
+							arc = new Arc(ArcTypeEnum.ARC, node, dummyTransitionSolution);
+							petriNet.addArc( arc);
+							
+						}
+					}
+				} 
+				
+				//create Input Dummy Place and link to transition-solution-first
+				if(branchingEpisodeTransition != null) {
+
+					//Link output dummy place of branching episode to input dummy place of alternative
+					arc = new Arc(ArcTypeEnum.ARC, branchingEpisodeOutDummyPlace, dummyTransitionSolution);
+					petriNet.addArc( arc);
+
+				} 
+				
+				//create Output Dummy Place and link to transition-solution-last
+				currentPositionX = dummyTransitionSolution.getPositionX();
+				Node outputDummyPlace = new Node(NodeTypeEnum.PLACE.getAcronym()+countDummyPlaces, NodeTypeEnum.PLACE.getAcronym()+countDummyPlaces, ScenarioElement.ALTERNATIVE_ID.getScenarioElement().replace("<id>", alternativeId), NodeTypeEnum.PLACE);
+				outputDummyPlace.setDummy(true);
+				outputDummyPlace.setPositionX(currentPositionX + INCREMENT_X);
+				outputDummyPlace.setPositionY(dummyTransitionSolution.getPositionY());
+				outputDummyPlace = petriNet.addNode( outputDummyPlace);
+				if(petriNet.getMaxPositionX() < outputDummyPlace.getPositionX())
+					petriNet.setMaxPositionX(outputDummyPlace.getPositionX());
+				countDummyPlaces++;
+
+				arc = new Arc(ArcTypeEnum.ARC, dummyTransitionSolution, outputDummyPlace);
+				petriNet.addArc( arc);				
+
 			}
-			//ALTERNATIVE WITHOUT SOLUTION
-			/*
-			 * else {
-			 * }
-			 */
+
 		}
 
 		return petriNet;

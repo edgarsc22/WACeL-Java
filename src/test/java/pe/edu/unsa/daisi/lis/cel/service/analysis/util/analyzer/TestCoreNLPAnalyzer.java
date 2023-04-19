@@ -805,7 +805,19 @@ public class TestCoreNLPAnalyzer {
 		    	//Pos tags
 		    	System.out.println(getPosTagsAsString(tokens));
 		    	assertEquals("[NN, VBZ, NNS, TO, VB, VBN, IN, DT, NN, CC, NNS, TO, VBP, NNS, IN, NN]", getPosTagsAsString(tokens)); //FIX Rule PTR4: time/VBP  ???? --> FIXED!
-		    			    	
+		    	
+		    	
+		    
+		    	String text95 = "The system exits gracefully.";
+		    	tokens = nlpAnalyzer.getTokens(text95);
+				//Tokens - words
+		    	System.out.println(getWordsAsString(tokens));
+		    	//Pos tags
+		    	System.out.println(getPosTagsAsString(tokens));
+		    	assertEquals("[DT, NN, VBZ, RB]", getPosTagsAsString(tokens)); 
+		    
+		    	
+		    	
 		    	
 		    	/*
 		    	String text83 = "user Log in to the system";
@@ -961,7 +973,9 @@ public class TestCoreNLPAnalyzer {
 		//String text1 = "Administrator chooses a group to which he wants to ADD A NEW CHANNEL";
 		
 		
-		String text1 = "User types in the numbers of his PIN and presses the Enter button"; //PIN: Indirect?
+		//String text1 = "User types in the numbers of his PIN and presses the Enter button"; //PIN: Indirect?
+		
+		String text1 = "System exits gracefully";
 		
 		//String text1 = "User selects the channels he/she wants to subscribe and/or deselects already subscribed channels to unsub-scribe them and chooses the Change subscription options";
 		

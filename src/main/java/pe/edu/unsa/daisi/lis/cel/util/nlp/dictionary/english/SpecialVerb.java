@@ -12,7 +12,7 @@ public final class SpecialVerb {
 	
 	public static final ArrayList<String> LINKING_VERBS = 
 				new ArrayList<String>(Arrays.asList("can", "be", "look", "feel", "taste", "smell", "sound", "seem", "appear", "get", "become", "grow", "stay", "keep", "turn", "prove", "go", "remain", "resemble", "run", "lie", "have",
-						"am", "is", "are", "looks", "feels", "tastes", "smells", "sounds", "seems", "appears", "gets", "becomes", "grows", "stays", "keeps", "turns", "proves", "goes", "remains", "resembles", "runs", "lies", "has",
+						"cant", "can't", "am", "is", "are", "looks", "feels", "tastes", "smells", "sounds", "seems", "appears", "gets", "becomes", "grows", "stays", "keeps", "turns", "proves", "goes", "remains", "resembles", "runs", "lies", "has",
 						"was", "were", "felt", "tasted", "smelt", "sounded", "seemed", "appeared", "got", "became", "grew", "stayed", "kept", "turned", "proved", "went", "remained", "resembled", "ran", "lay", "had",
 						"gotten", "grown", "gone", "lain"));
 		
@@ -568,6 +568,7 @@ public final class SpecialVerb {
 		
 		//Special Verb/Adjective
 		NOUNS_AND_VERBS_HASH.put("unsubscribe", true);
+		NOUNS_AND_VERBS_HASH.put("exit", true);
 	}
 }
 

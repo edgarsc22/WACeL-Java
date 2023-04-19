@@ -2,13 +2,22 @@ package pe.edu.unsa.daisi.lis.cel.util.scenario.preprocess;
 
 import java.util.ArrayList;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import pe.edu.unsa.daisi.lis.cel.domain.factory.NewDefect;
+import pe.edu.unsa.daisi.lis.cel.domain.model.analysis.Defect;
+import pe.edu.unsa.daisi.lis.cel.domain.model.analysis.DefectCategoryEnum;
+import pe.edu.unsa.daisi.lis.cel.domain.model.analysis.DefectIndicatorEnum;
+import pe.edu.unsa.daisi.lis.cel.domain.model.analysis.QualityPropertyEnum;
+import pe.edu.unsa.daisi.lis.cel.domain.model.analysis.ScenarioElement;
 import pe.edu.unsa.daisi.lis.cel.domain.model.scenario.Scenario;
 import pe.edu.unsa.daisi.lis.cel.domain.model.scenario.structured.StructuredAlternative;
 import pe.edu.unsa.daisi.lis.cel.domain.model.scenario.structured.StructuredContext;
 import pe.edu.unsa.daisi.lis.cel.domain.model.scenario.structured.StructuredEpisode;
 import pe.edu.unsa.daisi.lis.cel.domain.model.scenario.structured.StructuredScenario;
 import pe.edu.unsa.daisi.lis.cel.util.RegularExpression;
+import pe.edu.unsa.daisi.lis.cel.util.nlp.dictionary.english.SpecialVerb;
+import pe.edu.unsa.daisi.lis.cel.util.nlp.dictionary.english.Unambiguity;
 
 
 /**
@@ -466,8 +475,8 @@ public class ScenarioParser {
 					//LIMPAR O ID-ALTERNATIVE DE ", ; . %s" FINAL o INICIO
 					alternativeId = alternativeId.replaceAll(RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT, EMPTY_CHAR);
 					alternativeId = alternativeId.replaceAll(RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT, EMPTY_CHAR);
-					//Identificar partes do Id
 					
+					//Identificar partes do Id
 					Matcher matcherGroupsFromId = RegularExpression.PATTERN_ALTERNATIVE_ID.matcher(alternativeId);
 					Boolean isNewAlternative = false;
 					Boolean isStepOfPreviousAlternative = false;
@@ -765,8 +774,41 @@ public class ScenarioParser {
 			}
 			//FIX: Alternative without solution but with cause
 			if((alternative.getSolution() == null || alternative.getSolution().isEmpty()) && !alternative.isIfThenFormat()) {
-				alternative.setSolution(alternative.getCauses());
-				alternative.setCauses(new ArrayList<String>());
+				if (alternative.getCauses() != null && !alternative.getCauses().isEmpty()) {
+					String cause = alternative.getCauses().get(0).toLowerCase();
+					boolean isCause = false;
+					if (cause != null && !cause.isEmpty()) {
+						for (String indicator : SpecialVerb.LINKING_VERBS) {
+							String regExpWord = RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT + indicator + RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT;
+							//CHECKAR SI CONTIENE O NO, CASO NO, MANTENER COMO SOLUCION 
+							if (Pattern.compile(regExpWord).matcher(cause).find()) {
+								//Indicator: The cause contains linking verbs
+								isCause = true;
+								break;							
+							}	
+						}
+						if (!isCause) {
+							for (String indicator : SpecialVerb.STATE_VERBS) {
+								String regExpWord = RegularExpression.REGEX_PUNCTUATION_MARK_AT_BEGIN_TEXT + indicator + RegularExpression.REGEX_PUNCTUATION_MARK_AT_END_TEXT;
+								//CHECKAR SI CONTIENE O NO, CASO NO, MANTENER COMO SOLUCION 
+								if (Pattern.compile(regExpWord).matcher(cause).find()) {
+									//Indicator: The cause contains linking verbs
+									isCause = true;
+									break;							
+								}	
+							}
+						}
+						if (!isCause) {
+							alternative.setSolution(alternative.getCauses());
+							alternative.setCauses(new ArrayList<String>());
+						}
+					}
+					
+					
+				} else {
+					alternative.setSolution(alternative.getCauses());
+					alternative.setCauses(new ArrayList<String>());
+				}
 			}
 		}
 		
