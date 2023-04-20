@@ -54,6 +54,18 @@
 				<td align="left">
 					<input type="button" id="simBtnPN" value='<fmt:message key="petrinet.show.form.simulate"> </fmt:message>'/>
 				</td>
+				<td align="left">
+					<input type="button" id="overBtnPN" value='<fmt:message key="petrinet.show.form.simulate.overflow"> </fmt:message>'/>
+				</td>
+				<td align="left">
+					<input type="button" id="deadBtnPN" value='<fmt:message key="petrinet.show.form.simulate.deadlock"> </fmt:message>'/>
+				</td>
+				<td align="left">
+					<input type="button" id="neverBtnPN" value='<fmt:message key="petrinet.show.form.simulate.deadlock.never"> </fmt:message>'/>
+				</td>
+				<td align="left">
+					<input type="button" id="nondetBtnPN" value='<fmt:message key="petrinet.show.form.simulate.nondeterminism"> </fmt:message>'/>
+				</td>
 			</tr>
 			
 		</table>

@@ -43,6 +43,8 @@ var paper = new joint.dia.Paper({
 //Create Petri net
 var pn = joint.shapes.pn;
 
+var simulationId = null;
+
 //Save transitions for firing
 var jsonTransitionsHappyPath = [];
 
@@ -249,7 +251,9 @@ function fireTransition(t, sec) {
 }
 
 function simulateHappyPath() {
-
+	console.log(simulationId);
+	if(simulationId != null)
+		stopSimulation(simulationId);
     var transitions = jsonTransitionsHappyPath;
     transitions.forEach(function(t) {
         if (Math.random() < 0.7) {
@@ -266,8 +270,35 @@ function simulateHappyPath() {
     }, 1000);
 }
 
+function simulateOverflow() {
+	if(simulationId != null)
+		stopSimulation(simulationId);
+	
+}
+
+function simulateDeadlock() {
+	console.log(simulationId);
+	if(simulationId != null)
+		stopSimulation(simulationId);
+	
+}
+
+function simulateNeverEnabledTransitions() {
+	if(simulationId != null)
+		stopSimulation(simulationId);
+	
+}
+
+function simulateNonDeterminism() {
+	if(simulationId != null)
+		stopSimulation(simulationId);
+	
+}
+
+
+
 function stopSimulation(simulationId) {
-    clearInterval(simulationId);
+	clearInterval(simulationId);
 }
 
 //var simulationId = simulate();
@@ -319,7 +350,27 @@ function show_petri_net(scenario_id){
 			
 			// Simulate Petri Net.
 			document.getElementById("simBtnPN").addEventListener("click", function(){
-			    simulateHappyPath();
+				simulationId = simulateHappyPath();
+			}, false);
+			
+			// Simulate Petri Net Overflow.
+			document.getElementById("overBtnPN").addEventListener("click", function(){
+				simulationId = simulateOverflow();
+			}, false);
+			
+			// Simulate Petri Net Deadlock.
+			document.getElementById("deadBtnPN").addEventListener("click", function(){
+				simulationId = simulateDeadlock();
+			}, false);
+			
+			// Simulate Petri Net Never Enabled Transitions.
+			document.getElementById("neverBtnPN").addEventListener("click", function(){
+				simulationId = simulateNeverEnabledTransitions();
+			}, false);
+			
+			// Simulate Petri Net Non-deterministic situation.
+			document.getElementById("nondetBtnPN").addEventListener("click", function(){
+				simulationId = simulateNonDeterminism();
 			}, false);
 
 			// JAX-RS serializes an empty list as null, and a 'collection of one' as an object (not an 'array of one')
@@ -430,7 +481,27 @@ function show_integrated_petri_net(project_id, scenario_id){
 			
 			// Simulate Petri Net.
 			document.getElementById("simBtnPN").addEventListener("click", function(){
-			    simulateHappyPath();
+				simulationId = simulateHappyPath();
+			}, false);
+			
+			// Simulate Petri Net Overflow.
+			document.getElementById("overBtnPN").addEventListener("click", function(){
+				simulationId = simulateOverflow();
+			}, false);
+			
+			// Simulate Petri Net Deadlock.
+			document.getElementById("deadBtnPN").addEventListener("click", function(){
+				simulationId = simulateDeadlock();
+			}, false);
+			
+			// Simulate Petri Net Never Enabled Transitions.
+			document.getElementById("neverBtnPN").addEventListener("click", function(){
+				simulationId = simulateNeverEnabledTransitions();
+			}, false);
+			
+			// Simulate Petri Net Non-deterministic situation.
+			document.getElementById("nondetBtnPN").addEventListener("click", function(){
+				simulationId = simulateNonDeterminism();
 			}, false);
 
 			

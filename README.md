@@ -47,7 +47,7 @@ The scenario analysis functionality is activated after the user selects a projec
     
 ##### Scenario to Petri Net
 Once scenarios are constructed and pre-processed, it is possible to automatically generate Petri-Net formal models from structured scenarios. Figure below shows an integrated petri-net, i.e., petri-net was derived from a scenario and their related scenarios.
-    <img src="https://github.com/edgarsc22/WACeL-Java/blob/master/doc/gui/scenario_petri_net.png" width="700">
+    <img src="https://github.com/edgarsc22/WACeL-Java/blob/master/doc/gui/scenario_petri_net.jpeg" width="700">
 
 ### Tools:
 - [Stanford Core NLP](https://stanfordnlp.github.io/CoreNLP/)
