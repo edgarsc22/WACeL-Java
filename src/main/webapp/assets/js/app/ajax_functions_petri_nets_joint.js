@@ -45,23 +45,21 @@ var pn = joint.shapes.pn;
 
 var simulationId = null;
 
-//Save transitions for firing
-var jsonTransitionsHappyPath = [];
 
 /*Dynamic petri net creation*/
 function createPlace(id, label, pos_x, pos_y, tokens) {
 	var pNode = new pn.Place();
 	//common attributes
-	pNode.attr('.label/fill', '#7c68fc')
+	pNode.attr('.label/fill', '#000000')
 	//label orientation
 	pNode.attr('.label/textAnchor', 'middle')
 	pNode.attr('.label/refX', '80%')
 	pNode.attr('.label/refY', '50%')
 	pNode.attr('.label/fontSize', 14)
 	
-	pNode.attr('.root/stroke', '#9586fd');
+	pNode.attr('.root/stroke', '#000000');
 	pNode.attr('.root/stroke-width', 2);
-	pNode.attr('.tokens > circle/fill', '#b6092e');
+	pNode.attr('.tokens > circle/fill', '#000000');
 	
 	pNode.size(30, 30);
 	
@@ -77,7 +75,7 @@ function createPlace(id, label, pos_x, pos_y, tokens) {
 function createTransition(id, label, pos_x, pos_y, orientation) {
 	var pNode = new pn.Transition();
 	//common attributes
-	pNode.attr('.label/fill', '#fe854f')
+	pNode.attr('.label/fill', '#000000')
 	
 	//label orientation
 	pNode.attr('.label/textAnchor', 'middle')
@@ -85,8 +83,8 @@ function createTransition(id, label, pos_x, pos_y, orientation) {
 	pNode.attr('.label/refY', '50%')
 	pNode.attr('.label/fontSize', 14)
 	
-	pNode.attr('.root/fill', '#9586fd');
-	pNode.attr('.root/stroke', '#9586fd');
+	pNode.attr('.root/fill', '#000000');
+	pNode.attr('.root/stroke', '#000000');
 	pNode.attr('.root/stroke-width', 2);
 	
 	if(orientation == 0)
@@ -210,7 +208,7 @@ function fireTransition(t, sec) {
 
     var isFirable = true;
     placesBefore.forEach(function(p) {
-        if (p.get('tokens') === 0) {
+        if (p.get('tokens') <= 0) {
             isFirable = false;
         }
     });
@@ -218,10 +216,14 @@ function fireTransition(t, sec) {
     if (isFirable) {
 
         placesBefore.forEach(function(p) {
-            // Let the execution finish before adjusting the value of tokens. So that we can loop over all transitions
+            //enable transition
+			t.attr('.label/fill', '#b6092e');
+			t.attr('.root/fill', '#b6092e');
+			t.attr('.root/stroke', '#b6092e');
+			// Let the execution finish before adjusting the value of tokens. So that we can loop over all transitions
             // and call fireTransition() on the original number of tokens.
             setTimeout(function() {
-                p.set('tokens', p.get('tokens') - 1);
+                p.set('tokens', p.get('tokens') > 0 ? p.get('tokens') - 1: 0);
             }, 0);
 
             var links = inbound.filter(function(l) {
@@ -243,18 +245,19 @@ function fireTransition(t, sec) {
             links.forEach(function(l) {
                 var token = V('circle', { r: 7, fill: '#b6092e' });
                 l.findView(paper).sendToken(token, sec * 1000, function() {
-                    p.set('tokens', p.get('tokens') + 1);
+                    p.set('tokens', p.get('tokens') === 0 ? 1: p.get('tokens') + 1);
+					//disable transition
+					t.attr('.label/fill', '#000000');
+					t.attr('.root/fill', '#999999');
+					t.attr('.root/stroke', '#999999');
                 });
             });
         });
     }
 }
-
-function simulateHappyPath() {
-	console.log(simulationId);
-	if(simulationId != null)
-		stopSimulation(simulationId);
-    var transitions = jsonTransitionsHappyPath;
+// JSON transitions
+function simulate(transitions) {
+	
     transitions.forEach(function(t) {
         if (Math.random() < 0.7) {
             fireTransition(t, 1);
@@ -267,32 +270,117 @@ function simulateHappyPath() {
                 fireTransition(t, 1);
             }
         });
-    }, 1000);
+    }, 2000);
 }
 
-function simulateOverflow() {
+function simulateHappyPath(transitions) {
+	
 	if(simulationId != null)
 		stopSimulation(simulationId);
+    
+    simulate(transitions);
+}
+
+function simulateDeadlock(pathToDeadlock) {
+	if(simulationId != null)
+		stopSimulation(simulationId);
+	var path = [];
+	if(pathToDeadlock)
+		path = JSON.parse(pathToDeadlock);
+
+	//Save transitions (JSON) for firing
+	var transitions = [];
+
+	
+	for(let i = 0; i < path.length; i++) {
+		let idTransition = path[i];	
+		var transition = graph.getCell(idTransition);
+		transitions.push(transition);
+		
+	}
+	
+	simulate(transitions);
 	
 }
 
-function simulateDeadlock() {
-	console.log(simulationId);
+function simulateOverflow(placesToOverflow) {
 	if(simulationId != null)
 		stopSimulation(simulationId);
+	//location.reload();
+	var overflow = [];
+	if(placesToOverflow)
+		overflow = JSON.parse(placesToOverflow);
+
+	//Save places (JSON) for highlighting
+	var places = [];
 	
+	for(let i = 0; i < overflow.length; i++) {
+		let id = overflow[i];	
+		var place = graph.getCell(id);
+		places.push(place);
+	}
+	
+	places.forEach(function(p) {		
+		p.set('tokens', Number.POSITIVE_INFINITY);
+		p.attr('.label/fill', '#f44336');
+
+		p.attr('.root/stroke', '#f44336');
+		p.attr('.tokens > circle/fill', '#f44336');
+	});
 }
 
-function simulateNeverEnabledTransitions() {
+function simulateNeverEnabledTransitions(neverEnabledTransitions) {
 	if(simulationId != null)
 		stopSimulation(simulationId);
+	//location.reload();
+	var never = [];
+	if(neverEnabledTransitions)
+		never = JSON.parse(neverEnabledTransitions);
+
+	//Save transitions (JSON) for highlighting
+	var transitions = [];
 	
+	for(let i = 0; i < never.length; i++) {
+		let id = never[i];	
+		var transition = graph.getCell(id);
+		transitions.push(transition);
+	}
+	
+	transitions.forEach(function(t) {		
+		t.attr('.label/fill', '#f44336');
+		
+		t.attr('.root/fill', '#f44336');
+		t.attr('.root/stroke', '#f44336');
+	});
 }
 
-function simulateNonDeterminism() {
+function simulateNonDeterminism(nonDeterminismTransitions) {
 	if(simulationId != null)
 		stopSimulation(simulationId);
+	//location.reload();
 	
+	var nonDeterminism = [];
+	if(nonDeterminismTransitions)
+		nonDeterminism = JSON.parse(nonDeterminismTransitions);
+
+	//Save transitions (JSON) for highlighting
+	var transitions = [];
+	
+	for(let i = 0; i < nonDeterminism.length; i++) {
+		let setTransitions = nonDeterminism[i];
+		for(let j = 0; j < setTransitions.length; j++) {
+			let id = setTransitions[j];	
+			var transition = graph.getCell(id);
+			transitions.push(transition);
+		}
+	}
+	
+	transitions.forEach(function(t) {		
+		t.attr('.label/fill', '#f44336');
+		
+		t.attr('.root/fill', '#f44336');
+		t.attr('.root/stroke', '#f44336');
+	});
 }
 
 
@@ -322,6 +410,10 @@ function show_petri_net(scenario_id){
 	var jsonNodes = [];
 	var jsonEdges = [];	
 	var jsonGroupNodes = []; //Nodes that group related nodes
+	
+	
+	//Save transitions for firing
+	var jsonTransitionsHappyPath = [];
 
 	var num_nodes = 0;
 	var num_arcs = 0;
@@ -339,39 +431,13 @@ function show_petri_net(scenario_id){
 			var id_pn = data.id;
 			var name_pn = data.name;
 			var pnml = data.pnml;
-			// Start file download.
-			document.getElementById("dwnBtnPN").addEventListener("click", function(){
-			    // Generate download of pn_<name>.pnml file with some content
-			    var text = pnml;
-			    var filename = "pn_" +name_pn.split(' ').join('_') + ".pnml";
-			    
-			    download(filename, text);
-			}, false);
 			
-			// Simulate Petri Net.
-			document.getElementById("simBtnPN").addEventListener("click", function(){
-				simulationId = simulateHappyPath();
-			}, false);
-			
-			// Simulate Petri Net Overflow.
-			document.getElementById("overBtnPN").addEventListener("click", function(){
-				simulationId = simulateOverflow();
-			}, false);
-			
-			// Simulate Petri Net Deadlock.
-			document.getElementById("deadBtnPN").addEventListener("click", function(){
-				simulationId = simulateDeadlock();
-			}, false);
-			
-			// Simulate Petri Net Never Enabled Transitions.
-			document.getElementById("neverBtnPN").addEventListener("click", function(){
-				simulationId = simulateNeverEnabledTransitions();
-			}, false);
-			
-			// Simulate Petri Net Non-deterministic situation.
-			document.getElementById("nondetBtnPN").addEventListener("click", function(){
-				simulationId = simulateNonDeterminism();
-			}, false);
+			// get analysis
+			var pathToDeadlock = data.pathToDeadlock;
+			var nonDeterminismTransitions = data.nonDeterminismTransitions;
+			var placesToOverflow = data.placesToOverflow;
+			var neverEnabledTransitions = data.neverEnabledTransitions;
+					
 
 			// JAX-RS serializes an empty list as null, and a 'collection of one' as an object (not an 'array of one')
 			var list_nodes = data.nodes == null ? [] : (data.nodes instanceof Array ? data.nodes : [data.nodes]);
@@ -427,7 +493,42 @@ function show_petri_net(scenario_id){
 			
 			//Update paper height
 			//paper.scaleContentToFit();
-
+			
+			
+			// Start file download.
+			document.getElementById("dwnBtnPN").addEventListener("click", function(){
+			    // Generate download of pn_<name>.pnml file with some content
+			    var text = pnml;
+			    var filename = "pn_" +name_pn.split(' ').join('_') + ".pnml";
+			    
+			    download(filename, text);
+			}, false);
+			
+			// Simulate Petri Net.
+			document.getElementById("simBtnPN").addEventListener("click", function(){
+				simulationId = simulateHappyPath(jsonTransitionsHappyPath);
+			}, false);
+			
+			// Simulate Petri Net Overflow.
+			document.getElementById("overBtnPN").addEventListener("click", function(){
+				simulationId = simulateOverflow(placesToOverflow);
+			}, false);
+			
+			// Simulate Petri Net Deadlock.
+			document.getElementById("deadBtnPN").addEventListener("click", function(){
+				
+				simulationId = simulateDeadlock(pathToDeadlock);
+			}, false);
+			
+			// Simulate Petri Net Never Enabled Transitions.
+			document.getElementById("neverBtnPN").addEventListener("click", function(){
+				simulationId = simulateNeverEnabledTransitions(neverEnabledTransitions);
+			}, false);
+			
+			// Simulate Petri Net Non-deterministic situation.
+			document.getElementById("nondetBtnPN").addEventListener("click", function(){
+				simulationId = simulateNonDeterminism(nonDeterminismTransitions);
+			}, false);
 
 		},
 		
@@ -452,6 +553,10 @@ function show_integrated_petri_net(project_id, scenario_id){
 	var jsonEdges = [];	
 
 	var jsonGroupNodes = []; //Nodes that group related nodes
+	
+	//Save transitions for firing
+	var jsonTransitionsHappyPath = [];
+
 
 	var num_nodes = 0;
 	var num_arcs = 0;
@@ -470,41 +575,13 @@ function show_integrated_petri_net(project_id, scenario_id){
 			var name_pn = data.name;
 			
 			var pnml = data.pnml;
-			// Start file download.
-			document.getElementById("dwnBtnPN").addEventListener("click", function(){
-			    // Generate download of integrated_pn_<name>.pnml file with some content
-			    var text = pnml;
-			    var filename = "integrated_pn_" +name_pn.split(' ').join('_') + ".pnml";
-			    
-			    download(filename, text);
-			}, false);
 			
-			// Simulate Petri Net.
-			document.getElementById("simBtnPN").addEventListener("click", function(){
-				simulationId = simulateHappyPath();
-			}, false);
-			
-			// Simulate Petri Net Overflow.
-			document.getElementById("overBtnPN").addEventListener("click", function(){
-				simulationId = simulateOverflow();
-			}, false);
-			
-			// Simulate Petri Net Deadlock.
-			document.getElementById("deadBtnPN").addEventListener("click", function(){
-				simulationId = simulateDeadlock();
-			}, false);
-			
-			// Simulate Petri Net Never Enabled Transitions.
-			document.getElementById("neverBtnPN").addEventListener("click", function(){
-				simulationId = simulateNeverEnabledTransitions();
-			}, false);
-			
-			// Simulate Petri Net Non-deterministic situation.
-			document.getElementById("nondetBtnPN").addEventListener("click", function(){
-				simulationId = simulateNonDeterminism();
-			}, false);
-
-			
+			// get analysis
+			var pathToDeadlock = data.pathToDeadlock;
+			var nonDeterminismTransitions = data.nonDeterminismTransitions;
+			var placesToOverflow = data.placesToOverflow;
+			var neverEnabledTransitions = data.neverEnabledTransitions;
+									
 			// JAX-RS serializes an empty list as null, and a 'collection of one' as an object (not an 'array of one')
 			var list_nodes = data.nodes == null ? [] : (data.nodes instanceof Array ? data.nodes : [data.nodes]);
 			num_nodes = list_nodes.length;
@@ -610,6 +687,40 @@ function show_integrated_petri_net(project_id, scenario_id){
 			
 			//Update paper height
 			//paper.scaleContentToFit();
+			
+			// Start file download.
+			document.getElementById("dwnBtnPN").addEventListener("click", function(){
+			    // Generate download of integrated_pn_<name>.pnml file with some content
+			    var text = pnml;
+			    var filename = "integrated_pn_" +name_pn.split(' ').join('_') + ".pnml";
+			    
+			    download(filename, text);
+			}, false);
+			
+			// Simulate Petri Net.
+			document.getElementById("simBtnPN").addEventListener("click", function(){
+				simulationId = simulateHappyPath(jsonTransitionsHappyPath);
+			}, false);
+			
+			// Simulate Petri Net Overflow.
+			document.getElementById("overBtnPN").addEventListener("click", function(){
+				simulationId = simulateOverflow(placesToOverflow);
+			}, false);
+			
+			// Simulate Petri Net Deadlock.
+			document.getElementById("deadBtnPN").addEventListener("click", function(){
+				simulationId = simulateDeadlock(pathToDeadlock);
+			}, false);
+			
+			// Simulate Petri Net Never Enabled Transitions.
+			document.getElementById("neverBtnPN").addEventListener("click", function(){
+				simulationId = simulateNeverEnabledTransitions(neverEnabledTransitions);
+			}, false);
+			
+			// Simulate Petri Net Non-deterministic situation.
+			document.getElementById("nondetBtnPN").addEventListener("click", function(){
+				simulationId = simulateNonDeterminism(nonDeterminismTransitions);
+			}, false);
 
 		},
 

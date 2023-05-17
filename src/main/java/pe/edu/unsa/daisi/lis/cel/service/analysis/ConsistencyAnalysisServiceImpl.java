@@ -55,7 +55,7 @@ public class ConsistencyAnalysisServiceImpl implements IConsistencyAnalysisServi
 			Defect defect = NewDefect.buildDefect(mainScenario.getId(), ScenarioElement.TITLE.getScenarioElement(), null, 
 					QualityPropertyEnum.NON_INTERFERENTIAL.getQualityProperty(), 
 					DefectIndicatorEnum.NON_INTERFERENTIAL_SIMULTANEOUS_ENABLED_OPERATIONS_INDICATOR.getDefectIndicator(), null, 
-					enabledTransitions != null? enabledTransitions: pnAnalysisresult, 
+					enabledTransitions != null? enabledTransitions: null, 
 					DefectCategoryEnum.WARNING.getDefectCategory(), DefectIndicatorEnum.NON_INTERFERENTIAL_SIMULTANEOUS_ENABLED_OPERATIONS_INDICATOR.getFixRecomendation());
 						
 			defects.add(defect);

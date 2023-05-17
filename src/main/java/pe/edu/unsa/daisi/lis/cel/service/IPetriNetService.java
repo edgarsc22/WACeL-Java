@@ -38,6 +38,13 @@ public interface IPetriNetService {
 	 */
 	PetriNet integratePetriNetsFromMainScenario(StructuredScenario mainScenario, HashMap<String, List<StructuredScenario>> sequentiallyRelatedScenariosHashMap, HashMap<String, List<StructuredScenario>> nonSeqRelatedScenarioHashMap);
 	
+	
+	/**
+	 * @param petriNet
+	 * @return
+	 */
+	PetriNet analyzeReachabilityGraph (PetriNet petriNet);
+	
 	/**
 	 * Return a XML string in PNML format from a PetriNet
 	 * @param petriNet

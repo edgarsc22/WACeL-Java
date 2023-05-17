@@ -17,11 +17,17 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import pe.edu.unsa.daisi.lis.cel.domain.factory.NewDefect;
+import pe.edu.unsa.daisi.lis.cel.domain.model.analysis.Defect;
+import pe.edu.unsa.daisi.lis.cel.domain.model.analysis.DefectCategoryEnum;
+import pe.edu.unsa.daisi.lis.cel.domain.model.analysis.DefectIndicatorEnum;
+import pe.edu.unsa.daisi.lis.cel.domain.model.analysis.QualityPropertyEnum;
 import pe.edu.unsa.daisi.lis.cel.domain.model.analysis.ScenarioElement;
 import pe.edu.unsa.daisi.lis.cel.domain.model.petrinet.Arc;
 import pe.edu.unsa.daisi.lis.cel.domain.model.petrinet.ArcTypeEnum;
@@ -32,6 +38,7 @@ import pe.edu.unsa.daisi.lis.cel.domain.model.scenario.structured.StructuredAlte
 import pe.edu.unsa.daisi.lis.cel.domain.model.scenario.structured.StructuredEpisode;
 import pe.edu.unsa.daisi.lis.cel.domain.model.scenario.structured.StructuredScenario;
 import pe.edu.unsa.daisi.lis.cel.util.scenario.preprocess.ScenarioManipulation;
+import pipe.modules.stateSpace.StateSpace;
 
 /**
  *
@@ -583,7 +590,7 @@ public class PetriNetServiceImpl implements IPetriNetService {
 
 				}
 
-				//Create Input Places and transitions from DO-WHILE episode
+				//Create Input Places and transitions from WHILE-DO episode
 				if(episode.isIterativeWhileDo()) {//transitionEpisodeSentence.getLabel()+"_WHILE",
 					dummyTransition = new Node("WHILE_"+transitionEpisodeSentence.getLabel(),
 							scenario.getId() +LABEL_COMPONENTS_DELIMITER+ NodeTypeEnum.TRANSITION.getAcronym() + LABEL_COMPONENTS_DELIMITER + episodeId + LABEL_COMPONENTS_DELIMITER + "WHILE",
@@ -1473,6 +1480,49 @@ public class PetriNetServiceImpl implements IPetriNetService {
 	}
 
 
+	public PetriNet analyzeReachabilityGraph (PetriNet petriNet) {
+		StreamSource streamPN = createPNMLStreamSource(petriNet);
+		
+		//Generate reachability Graph for Integrated Petri-Net
+		StateSpace stateSpace = new StateSpace();
+		String pnAnalysisresult = stateSpace.stateSpaceAnalysisSummary(streamPN);
+		
+		Boolean bounded = true;
+		Boolean safe = true;
+		Boolean live = true;
+		
+		if(pnAnalysisresult.contains("Simultaneously enabled transitions:") ) {
+			String enabledTransitions = StringUtils.substringBetween(pnAnalysisresult, "Simultaneously enabled transitions:", System.getProperty("line.separator"));
+			if(!enabledTransitions.isEmpty())
+				petriNet.setNonDeterminismTransitions(enabledTransitions);					
+		}
+		
+		if(pnAnalysisresult.contains("Places to overflow:")) {
+			String boundedPlaces = StringUtils.substringBetween(pnAnalysisresult, "Places to overflow:", System.getProperty("line.separator"));
+			bounded = false;
+			if(!boundedPlaces.isEmpty())
+				petriNet.setPlacesToOverflow(boundedPlaces);			
+		}
+		
+		if(pnAnalysisresult.contains("Shortest path to deadlock:")) {
+			String deadlockTransitions = StringUtils.substringBetween(pnAnalysisresult, "Shortest path to deadlock:", System.getProperty("line.separator"));
+			live = false;
+			if(!deadlockTransitions.isEmpty())
+				petriNet.setPathToDeadlock(deadlockTransitions);			
+		}
+		
+		if(pnAnalysisresult.contains("Never enabled transitions:")) {
+			String neverEnabledTransitions = StringUtils.substringBetween(pnAnalysisresult, "Never enabled transitions:", System.getProperty("line.separator"));
+			live = false;
+			if(!neverEnabledTransitions.isEmpty())
+				petriNet.setNeverEnabledTransitions(neverEnabledTransitions);			
+		}
+		
+		
+		return petriNet;
+	}
+	
+	
 	private boolean containList(LinkedList<Node> lstTemp1,LinkedList<Node> lstTemp2){
 		Node first = lstTemp2.getFirst();
 		boolean val = false;

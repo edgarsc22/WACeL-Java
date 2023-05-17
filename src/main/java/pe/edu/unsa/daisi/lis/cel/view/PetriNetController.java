@@ -54,6 +54,9 @@ public class PetriNetController  extends GenericController{
 		
 		//PNML
 		petriNet.setPnml(petriNetService.createPNML(petriNet));
+		
+		petriNet = petriNetService.analyzeReachabilityGraph(petriNet);
+		
 		return petriNet;		
 	}
 
@@ -85,6 +88,9 @@ public class PetriNetController  extends GenericController{
 		}
 		//PNML
 		mainPetriNet.setPnml(petriNetService.createPNML(mainPetriNet));
+		
+		mainPetriNet = petriNetService.analyzeReachabilityGraph(mainPetriNet);
+		
 		return mainPetriNet;		
 	}
 	

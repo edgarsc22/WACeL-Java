@@ -38,9 +38,9 @@ public class Scenario implements Serializable{
 	@Column(name="TITLE", nullable=false, length = 500)
 	private String title;
 
-	@NotEmpty
+	
 	@Lob
-	@Column(name="GOAL", nullable=false)
+	@Column(name="GOAL")
 	private String goal;
 
 	@NotEmpty
@@ -53,9 +53,9 @@ public class Scenario implements Serializable{
 	@Column(name="ACTORS", nullable=false)
 	private String actors; //names separated by ","
 	
-	@NotEmpty
+	
 	@Lob
-	@Column(name="RESORCES", nullable=false)
+	@Column(name="RESORCES")
 	private String resources; //names separated by ","
 	
 	@NotEmpty
@@ -64,7 +64,7 @@ public class Scenario implements Serializable{
 	private String episodes; //Steps separated by "\n", and straing with an id ("1. ...")
 	
 	@Lob
-	@Column(name="ALTERNATIVE", nullable=false)
+	@Column(name="ALTERNATIVE")
 	private String alternative; //Alternate/Exception Steps separated by "\n", and starting with an <Step><Ref> ("1.1 ...")
 	
 	@Column(name = "INCLUSION_DATE")

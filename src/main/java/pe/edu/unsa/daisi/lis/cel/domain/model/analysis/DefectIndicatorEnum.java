@@ -123,7 +123,7 @@ public enum DefectIndicatorEnum implements Serializable{
 	//consistency
 	CONSISTENCY_DEFECT_INDICATOR("The presence of defects is a strong indication, although not conclusive, of incorrectness that must be fixed.", "<i>Notify to the next software development activities</i>"),
 	
-	NON_INTERFERENTIAL_SIMULTANEOUS_ENABLED_OPERATIONS_INDICATOR("Petri-Net with simultaneously enabled transitions - operations {<b><i><indicator></i></b>}", "<i>1. Check that all pre-conditions or constraints associated to the episode/alternative corresponding to the transition are fulfilled <br/>2. Notify to the next software development activities</i>"),
+	NON_INTERFERENTIAL_SIMULTANEOUS_ENABLED_OPERATIONS_INDICATOR("Petri-Net with simultaneously enabled transitions - operations: <b><i><indicator></i></b>", "<i>1. Check that all pre-conditions or constraints associated to the episode/alternative corresponding to the transition are fulfilled <br/>2. Notify to the next software development activities</i>"),
 	
 	BOUNDEDNESS_RESOURCE_OVERFLOW_INDICATOR("Petri-Net is not bounded, i.e, It contains overflowed places - resources: {<b><i><indicator></i></b>}", "<i>1. Check that the overflowed resources is a critical shared resource modified by several operations or scenarios <br/>2. Check that the overflowed resources capacity <br/>3. Notify to the next software development activities</i>"),
 	

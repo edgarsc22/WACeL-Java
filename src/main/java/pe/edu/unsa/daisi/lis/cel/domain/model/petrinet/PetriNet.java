@@ -41,6 +41,14 @@ public class PetriNet implements Serializable {
 	private int maxPositionY;
 	
 	private String pnml; //String-XML with PNML format
+	
+	private String pathToDeadlock;
+	
+	private String nonDeterminismTransitions;
+	
+	private String placesToOverflow;
+	
+	private String neverEnabledTransitions;
 		
 	public PetriNet() {
 		
@@ -58,6 +66,10 @@ public class PetriNet implements Serializable {
 		this.maxPositionX = 0;
 		this.maxPositionY = 0;
 		this.pnml = "";
+		this.pathToDeadlock  = "";
+		this.nonDeterminismTransitions = "";
+		this.placesToOverflow ="";
+		this.neverEnabledTransitions ="";
 	}
 
 	public Long getId() {
@@ -165,6 +177,42 @@ public class PetriNet implements Serializable {
 	}
 
 	
+	
+	public String getPathToDeadlock() {
+		return pathToDeadlock;
+	}
+
+	public void setPathToDeadlock(String pathToDeadlock) {
+		this.pathToDeadlock = pathToDeadlock;
+	}
+
+
+	
+
+	public String getNonDeterminismTransitions() {
+		return nonDeterminismTransitions;
+	}
+
+	public void setNonDeterminismTransitions(String nonDeterminismTransitions) {
+		this.nonDeterminismTransitions = nonDeterminismTransitions;
+	}
+
+	public String getPlacesToOverflow() {
+		return placesToOverflow;
+	}
+
+	public void setPlacesToOverflow(String placesToOverflow) {
+		this.placesToOverflow = placesToOverflow;
+	}
+
+	public String getNeverEnabledTransitions() {
+		return neverEnabledTransitions;
+	}
+
+	public void setNeverEnabledTransitions(String neverEnabledTransitions) {
+		this.neverEnabledTransitions = neverEnabledTransitions;
+	}
+
 	/**
 	@Titulo: Add New Node
 	@Objetivo: Add a node to the petriNet.
