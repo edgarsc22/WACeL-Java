@@ -172,7 +172,7 @@ public class ScenarioParser {
 							
 						}
 						//SE NAO E CONDITIONAL OU OPTIONAL ENTAO VERIFICAR SE É EPISODIO ITERATIVE DO-WHILE
-						if(structuredEpisode.getType() == null || (!structuredEpisode.isConditional() && !structuredEpisode.isOptional()))  {
+						if(structuredEpisode.getType() == null) {// == null || (!structuredEpisode.isConditional() && !structuredEpisode.isOptional()))  {
 							//VERIFICAR SE É EPISODIO ITERATIVE DO-WHILE
 							structuredEpisode = extractIterativeDoWhileEpisode(episode);
 							if(structuredEpisode != null && structuredEpisode.isIterativeDoWhile())
@@ -182,8 +182,7 @@ public class ScenarioParser {
 
 						}
 						//SE NAO E CONDITIONAL OU OPTIONAL OU ITERATIVE DO-WHILE ENTAO VERIFICAR SE É EPISODIO ITERATIVE WHILE-DO
-						if(structuredEpisode.getType() == null || (!structuredEpisode.isConditional() && !structuredEpisode.isOptional() 
-																	&& structuredEpisode.isIterativeDoWhile()))  {
+						if(structuredEpisode.getType() == null) {// == null || (!structuredEpisode.isConditional() && !structuredEpisode.isOptional() && structuredEpisode.isIterativeDoWhile()))  {
 							//VERIFICAR SE É EPISODIO ITERATIVE WHILE-DO
 							structuredEpisode = extractIterativeWhileDoEpisode(episode);
 							if(structuredEpisode != null && structuredEpisode.isIterativeWhileDo())
@@ -194,8 +193,7 @@ public class ScenarioParser {
 						}
 						
 						//SE NAO E CONDITIONAL OU OPTIONAL OU ITERATIVE DO-WHILE OU WHILE-DO ENTAO VERIFICAR SE É EPISODIO ITERATIVE FOR-EACH-DO
-						if(structuredEpisode.getType() == null || (!structuredEpisode.isConditional() && !structuredEpisode.isOptional() 
-																	&& structuredEpisode.isIterativeDoWhile() && !structuredEpisode.isIterativeWhileDo()))  {
+						if(structuredEpisode.getType() == null) {// == null || (!structuredEpisode.isConditional() && !structuredEpisode.isOptional() && structuredEpisode.isIterativeDoWhile() && !structuredEpisode.isIterativeWhileDo()))  {
 							//VERIFICAR SE É EPISODIO ITERATIVE FOR-EACH-DO
 							structuredEpisode = extractIterativeForEachDoEpisode(episode);
 							if(structuredEpisode != null && structuredEpisode.isIterativeForEachDo())
@@ -206,9 +204,7 @@ public class ScenarioParser {
 						}
 						
 						//SE NAO E CONDITIONAL OU OPTIONAL OU ITERATIVE ENTAO VERIFICAR SE É EPISODIO SIMPLE
-						if(structuredEpisode.getType() == null || (!structuredEpisode.isConditional() && !structuredEpisode.isOptional() 
-																	&& !structuredEpisode.isIterativeDoWhile() && !structuredEpisode.isIterativeWhileDo()
-																	 && !structuredEpisode.isIterativeForEachDo()))  {
+						if(structuredEpisode.getType() == null) {// == null || (!structuredEpisode.isConditional() && !structuredEpisode.isOptional() && !structuredEpisode.isIterativeDoWhile() && !structuredEpisode.isIterativeWhileDo() && !structuredEpisode.isIterativeForEachDo()))  {
 							//Incializar Episodio Estructurado
 							episodeSentence = episode;
 							structuredEpisode.createSimpleEpisode(episodeId, episodeSentence);
