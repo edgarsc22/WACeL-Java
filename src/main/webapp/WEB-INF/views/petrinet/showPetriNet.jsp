@@ -14,12 +14,10 @@
 	
 	
 		<script src="<c:url value='/assets/js/jquery/jquery.min.js' />" ></script>
-		
-	
+			
 		<!-- APP -->
 		<script src="<c:url value='/assets/js/app/ajax_functions.js' />" ></script>
-		
-				
+						
 		<!-- importar libs para visualizacao de grafos - Joint JS -->
 		<link href="<c:url value='/assets/css/joint/joint.css' />" rel="stylesheet"></link>
 		<link href="<c:url value='/assets/css/joint/shapes.devs.css' />" rel="stylesheet"></link>
@@ -29,6 +27,12 @@
         <script src="<c:url value='/assets/js/lodash/lodash.js' />" ></script>
         <script src="<c:url value='/assets/js/backbone/backbone.js' />" ></script>
 		<script src="<c:url value='/assets/js/joint/joint.js' />" ></script>
+		
+		<!-- Before Bootstrap JS --> 
+		<link href="<c:url value='/assets/css/bootstrap/css/bootstrap.css' />" rel="stylesheet"></link>		
+		<script src="<c:url value='/assets/js/popper/popper.js' />" ></script>
+		<script src="<c:url value='/assets/js/bootstrap/js/bootstrap.min.js' />" ></script>
+	
 				
 		<script type="text/javascript">
 
@@ -49,22 +53,22 @@
 			</tr>
 			<tr>
 				<td align="left">
-					<input type="button" id="dwnBtnPN" value='<fmt:message key="petrinet.show.form.download"> </fmt:message>'/>
+					<input type="button" id="dwnBtnPN" value='<fmt:message key="petrinet.show.form.download"> </fmt:message>'  class="btn btn-outline-secondary custom-width"/>
 				</td>
 				<td align="left">
-					<input type="button" id="simBtnPN" value='<fmt:message key="petrinet.show.form.simulate"> </fmt:message>'/>
+					<input type="button" id="simBtnPN" value='<fmt:message key="petrinet.show.form.simulate"> </fmt:message>' class="btn btn-outline-success custom-width"/>
 				</td>
 				<td align="left">
-					<input type="button" id="overBtnPN" value='<fmt:message key="petrinet.show.form.simulate.overflow"> </fmt:message>'/>
+					<input type="button" id="overBtnPN" value='<fmt:message key="petrinet.show.form.simulate.overflow"> </fmt:message>' class="btn btn-outline-danger custom-width"/>
 				</td>
 				<td align="left">
-					<input type="button" id="deadBtnPN" value='<fmt:message key="petrinet.show.form.simulate.deadlock"> </fmt:message>'/>
+					<input type="button" id="deadBtnPN" value='<fmt:message key="petrinet.show.form.simulate.deadlock"> </fmt:message>'  class="btn btn-outline-warning custom-width"/>
 				</td>
 				<td align="left">
-					<input type="button" id="neverBtnPN" value='<fmt:message key="petrinet.show.form.simulate.deadlock.never"> </fmt:message>'/>
+					<input type="button" id="neverBtnPN" value='<fmt:message key="petrinet.show.form.simulate.deadlock.never"> </fmt:message>'  class="btn btn-outline-primary custom-width"/>
 				</td>
 				<td align="left">
-					<input type="button" id="nondetBtnPN" value='<fmt:message key="petrinet.show.form.simulate.nondeterminism"> </fmt:message>'/>
+					<input type="button" id="nondetBtnPN" value='<fmt:message key="petrinet.show.form.simulate.nondeterminism"> </fmt:message>' class="btn btn-outline-info custom-width"/>
 				</td>
 			</tr>
 			

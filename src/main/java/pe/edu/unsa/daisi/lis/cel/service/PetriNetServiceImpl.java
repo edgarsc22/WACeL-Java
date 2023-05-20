@@ -329,7 +329,7 @@ public class PetriNetServiceImpl implements IPetriNetService {
 				if(episode.isConditional() || episode.isOptional()) {//transitionEpisodeSentence.getLabel()+"_ELSE",
 					dummyTransition = new Node("ELSE_"+transitionEpisodeSentence.getLabel(),
 							scenario.getId() +LABEL_COMPONENTS_DELIMITER+ NodeTypeEnum.TRANSITION.getAcronym() + LABEL_COMPONENTS_DELIMITER + episodeId + LABEL_COMPONENTS_DELIMITER + "ELSE",
-							ScenarioElement.EPISODE_SENTENCE.getScenarioElement().replace("<id>", episodeId), NodeTypeEnum.TRANSITION);
+							ScenarioElement.EPISODE_SENTENCE.getScenarioElement().replace("<id>", episodeId), NodeTypeEnum.TRANSITION_ELSE);
 
 					//dummyTransition.setTimed(true);
 					dummyTransition.setDummy(true);
@@ -346,35 +346,39 @@ public class PetriNetServiceImpl implements IPetriNetService {
 
 					//Conditions
 					currentPositionX = transitionEpisodeSentence.getPositionX();
-					for(String condition : episode.getConditions()) {
-						if(condition != null && !condition.isEmpty()) {
-							Node node = new Node(condition, condition, ScenarioElement.EPISODE_CONDITION.getScenarioElement().replace("<id>", episodeId), NodeTypeEnum.PLACE_WITH_TOKEN);
-							node.setTokens(1);
-							currentPositionX = currentPositionX - INCREMENT_X;
-							node.setPositionX(currentPositionX);
-							node.setPositionY(currentPositionY - INCREMENT_Y);
-							node = petriNet.addNode( node);
-
-							if(petriNet.getMinPositionX() > node.getPositionX())
-								petriNet.setMinPositionX(node.getPositionX());
-
-
-							arc = new Arc(ArcTypeEnum.ARC, node, transitionEpisodeSentence);
-							arc = petriNet.addArc( arc);
-							//arc = new Arc(ArcType.ARC, transitionEpisodeSentence, node);
-							//petriNet = addArc( arc);
-						}
-					}
+					
+					//Update input dummy place with conditions
+					String conditions = String.join("|", episode.getConditions());
+					inputDummyPlace.setName(conditions);
+					inputDummyPlace.setLabel(conditions);
+					inputDummyPlace.setTrace(ScenarioElement.EPISODE_CONDITION.getScenarioElement().replace("<id>", episodeId));
+					inputDummyPlace = petriNet.updateNodeById(inputDummyPlace);
+					
+//					for(String condition : episode.getConditions()) {
+//						if(condition != null && !condition.isEmpty()) {
+//							Node node = new Node(condition, condition, ScenarioElement.EPISODE_CONDITION.getScenarioElement().replace("<id>", episodeId), NodeTypeEnum.PLACE_WITH_TOKEN);
+//							node.setTokens(1);
+//							currentPositionX = currentPositionX - INCREMENT_X;
+//							node.setPositionX(currentPositionX);
+//							node.setPositionY(currentPositionY - INCREMENT_Y);
+//							node = petriNet.addNode( node);
+//
+//							if(petriNet.getMinPositionX() > node.getPositionX())
+//								petriNet.setMinPositionX(node.getPositionX());
+//
+//							arc = new Arc(ArcTypeEnum.ARC, node, transitionEpisodeSentence);
+//							petriNet.addArc( arc);						
+//						}
+//					}
 
 				}
-				currentPositionY = outputDummyPlace.getPositionY();
 				currentPositionY = outputDummyPlace.getPositionY();
 				
 				lastTransitionEpisode = transitionEpisodeSentence;
 
 			}
 
-			if(episode.isIterativeDoWhile() || episode.isIterativeWhileDo() || episode.isIterativeForEachDo()) {//transitionEpisodeSentence.getLabel()+"_WHILE",
+			if(episode.isIterativeDoWhile() || episode.isIterativeWhileDo() || episode.isIterativeForEachDo()) {
 				//BEGIN transition
 				Node beginStructTransition = new Node("BEGIN_"+transitionEpisodeSentence.getLabel(),
 						scenario.getId() +LABEL_COMPONENTS_DELIMITER+ NodeTypeEnum.TRANSITION.getAcronym() + LABEL_COMPONENTS_DELIMITER + episodeId + LABEL_COMPONENTS_DELIMITER + "BEGIN",
@@ -425,7 +429,7 @@ public class PetriNetServiceImpl implements IPetriNetService {
 				arc = new Arc(ArcTypeEnum.ARC, inputDummyPlace, beginStructTransition);
 				arc = petriNet.addArc(arc);
 
-				//Create Output Place of BEGIN transition
+				//Create Output Place of BEGIN transition - ODPL
 				Node outDummyPlaceLoopBegin = new Node(NodeTypeEnum.PLACE.getAcronym()+countDummyPlaces, NodeTypeEnum.PLACE.getAcronym()+countDummyPlaces, ScenarioElement.EPISODE_ID.getScenarioElement().replace("<id>", episodeId), NodeTypeEnum.PLACE);
 				outDummyPlaceLoopBegin.setDummy(true);
 				outDummyPlaceLoopBegin.setPositionX(currentPositionX);
@@ -470,14 +474,14 @@ public class PetriNetServiceImpl implements IPetriNetService {
 
 				}
 
-				//Create Xput Place
-				Node xDummyPlaceLoop = new Node(NodeTypeEnum.PLACE.getAcronym()+countDummyPlaces, NodeTypeEnum.PLACE.getAcronym()+countDummyPlaces, ScenarioElement.EPISODE_ID.getScenarioElement().replace("<id>", episodeId), NodeTypeEnum.PLACE);
-				xDummyPlaceLoop.setDummy(true);
-				xDummyPlaceLoop.setPositionX(currentPositionX - INCREMENT_X);
-				xDummyPlaceLoop.setPositionY(currentPositionY + INCREMENT_Y);
-
-				xDummyPlaceLoop = petriNet.addNode(xDummyPlaceLoop);
-				countDummyPlaces++;
+				//Create Xput Place - XDPL
+//				Node xDummyPlaceLoop = new Node(NodeTypeEnum.PLACE.getAcronym()+countDummyPlaces, NodeTypeEnum.PLACE.getAcronym()+countDummyPlaces, ScenarioElement.EPISODE_ID.getScenarioElement().replace("<id>", episodeId), NodeTypeEnum.PLACE);
+//				xDummyPlaceLoop.setDummy(true);
+//				xDummyPlaceLoop.setPositionX(currentPositionX - INCREMENT_X);
+//				xDummyPlaceLoop.setPositionY(currentPositionY + INCREMENT_Y);
+//
+//				xDummyPlaceLoop = petriNet.addNode(xDummyPlaceLoop);
+//				countDummyPlaces++;
 
 				//END transition
 				Node endStructTransition = new Node("END_"+transitionEpisodeSentence.getLabel(),
@@ -486,9 +490,11 @@ public class PetriNetServiceImpl implements IPetriNetService {
 
 				//endStructTransition.setTimed(true);
 				endStructTransition.setDummy(true);
-				currentPositionX = xDummyPlaceLoop.getPositionX();
-				endStructTransition.setPositionX(currentPositionX + INCREMENT_X);
-				currentPositionY = xDummyPlaceLoop.getPositionY() + INCREMENT_Y;
+				//currentPositionX = xDummyPlaceLoop.getPositionX();
+				currentPositionX = transitionEpisodeSentence.getPositionX();
+				endStructTransition.setPositionX(currentPositionX - INCREMENT_X);
+				//currentPositionY = xDummyPlaceLoop.getPositionY() + INCREMENT_Y;
+				currentPositionY = transitionEpisodeSentence.getPositionY() + 2*INCREMENT_Y;
 				endStructTransition.setPositionY(currentPositionY);
 				
 				endStructTransition = petriNet.addNode(endStructTransition);
@@ -537,16 +543,16 @@ public class PetriNetServiceImpl implements IPetriNetService {
 
 
 				Node dummyTransition = null;
-				currentPositionX = transitionEpisodeSentence.getPositionX();
+				//currentPositionX = transitionEpisodeSentence.getPositionX();
 				//Create Input Places and transitions from DO-WHILE episode
 				if(episode.isIterativeDoWhile()) {//transitionEpisodeSentence.getLabel()+"_WHILE",
 					dummyTransition = new Node("WHILE_"+transitionEpisodeSentence.getLabel(),
 							scenario.getId() +LABEL_COMPONENTS_DELIMITER+ NodeTypeEnum.TRANSITION.getAcronym() + LABEL_COMPONENTS_DELIMITER + episodeId + LABEL_COMPONENTS_DELIMITER + "WHILE",
-							ScenarioElement.EPISODE_SENTENCE.getScenarioElement().replace("<id>", episodeId), NodeTypeEnum.TRANSITION);
+							ScenarioElement.EPISODE_SENTENCE.getScenarioElement().replace("<id>", episodeId), NodeTypeEnum.TRANSITION_DO_WHILE);
 
 					//dummyTransition.setTimed(true);
 					dummyTransition.setDummy(true);
-					dummyTransition.setPositionX(currentPositionX - 2*INCREMENT_X);
+					dummyTransition.setPositionX(currentPositionX - INCREMENT_X);
 					dummyTransition.setPositionY(transitionEpisodeSentence.getPositionY() + SMALL_INCREMENT_Y);
 					dummyTransition = petriNet.addNode(dummyTransition);
 					//countTransitions++;
@@ -557,36 +563,44 @@ public class PetriNetServiceImpl implements IPetriNetService {
 					arc = new Arc(ArcTypeEnum.ARC, outDummyPlaceLoopBegin, transitionEpisodeSentence);
 					arc = petriNet.addArc(arc);
 
-					arc = new Arc(ArcTypeEnum.ARC, transitionEpisodeSentence, xDummyPlaceLoop);
-					arc = petriNet.addArc(arc);
-
-					arc = new Arc(ArcTypeEnum.ARC, xDummyPlaceLoop, dummyTransition);
-					arc = petriNet.addArc(arc);
-
-					arc = new Arc(ArcTypeEnum.ARC, xDummyPlaceLoop, endStructTransition);
-					arc = petriNet.addArc(arc);
-
-
 					//Conditions
-					currentPositionX = dummyTransition.getPositionX();
-					for(String condition : episode.getConditions()) {
-						if(condition != null && !condition.isEmpty()) {
-							Node node = new Node(condition, condition, ScenarioElement.EPISODE_CONDITION.getScenarioElement().replace("<id>", episodeId), NodeTypeEnum.PLACE_WITH_TOKEN);
-							node.setTokens(1);
-							currentPositionX = currentPositionX - INCREMENT_X;
-							node.setPositionX(currentPositionX);
-							node.setPositionY(dummyTransition.getPositionY() - INCREMENT_Y);
-							node = petriNet.addNode( node);
+					//currentPositionX = dummyTransition.getPositionX();
+//					for(String condition : episode.getConditions()) {
+//						if(condition != null && !condition.isEmpty()) {
+//							Node node = new Node(condition, condition, ScenarioElement.EPISODE_CONDITION.getScenarioElement().replace("<id>", episodeId), NodeTypeEnum.PLACE_WITH_TOKEN);
+//							node.setTokens(1);
+//							currentPositionX = currentPositionX - INCREMENT_X;
+//							node.setPositionX(currentPositionX);
+//							node.setPositionY(dummyTransition.getPositionY() - INCREMENT_Y);
+//							node = petriNet.addNode( node);
+//
+//							if(petriNet.getMinPositionX() > node.getPositionX())
+//								petriNet.setMinPositionX(node.getPositionX());
+//
+//							arc = new Arc(ArcTypeEnum.ARC, node, dummyTransition);
+//							petriNet.addArc( arc);							
+//						}
+//					}
+					
+					//Update input dummy place with conditions
+					currentPositionX = endStructTransition.getPositionX();
+					currentPositionY = endStructTransition.getPositionY() + INCREMENT_Y ;
+					String conditions = String.join("|", episode.getConditions());
+					Node conditionsPlace = new Node(conditions, conditions, ScenarioElement.EPISODE_CONDITION.getScenarioElement().replace("<id>", episodeId), NodeTypeEnum.PLACE);
+					conditionsPlace.setPositionX(currentPositionX);
+					conditionsPlace.setPositionY(currentPositionY - 2*INCREMENT_Y);	
+					conditionsPlace = petriNet.addNode(conditionsPlace);
+					countDummyPlaces++;
+					
+					arc = new Arc(ArcTypeEnum.ARC, transitionEpisodeSentence, conditionsPlace);
+					petriNet.addArc(arc);
 
-							if(petriNet.getMinPositionX() > node.getPositionX())
-								petriNet.setMinPositionX(node.getPositionX());
+					arc = new Arc(ArcTypeEnum.ARC, conditionsPlace, dummyTransition);
+					petriNet.addArc(arc);
 
-							arc = new Arc(ArcTypeEnum.ARC, node, dummyTransition);
-							arc = petriNet.addArc( arc);
-							//arc = new Arc(ArcType.ARC, dummyTransition, node);
-							//petriNet = addArc( arc);
-						}
-					}
+					arc = new Arc(ArcTypeEnum.ARC, conditionsPlace, endStructTransition);
+					petriNet.addArc(arc);			
+
 
 				}
 
@@ -606,11 +620,11 @@ public class PetriNetServiceImpl implements IPetriNetService {
 					arc = new Arc(ArcTypeEnum.ARC, outDummyPlaceLoopBegin, dummyTransition);
 					arc = petriNet.addArc(arc);
 
-					arc = new Arc(ArcTypeEnum.ARC, dummyTransition, xDummyPlaceLoop);
-					arc = petriNet.addArc(arc);
-
-					arc = new Arc(ArcTypeEnum.ARC, xDummyPlaceLoop, transitionEpisodeSentence);
-					arc = petriNet.addArc(arc);
+//					arc = new Arc(ArcTypeEnum.ARC, dummyTransition, xDummyPlaceLoop);
+//					arc = petriNet.addArc(arc);
+//
+//					arc = new Arc(ArcTypeEnum.ARC, xDummyPlaceLoop, transitionEpisodeSentence);
+//					arc = petriNet.addArc(arc);
 
 					arc = new Arc(ArcTypeEnum.ARC, transitionEpisodeSentence, outDummyPlaceLoopBegin);
 					arc = petriNet.addArc(arc);
@@ -657,11 +671,11 @@ public class PetriNetServiceImpl implements IPetriNetService {
 					arc = new Arc(ArcTypeEnum.ARC, outDummyPlaceLoopBegin, dummyTransition);
 					arc = petriNet.addArc(arc);
 
-					arc = new Arc(ArcTypeEnum.ARC, dummyTransition, xDummyPlaceLoop);
-					arc = petriNet.addArc(arc);
-
-					arc = new Arc(ArcTypeEnum.ARC, xDummyPlaceLoop, transitionEpisodeSentence);
-					arc = petriNet.addArc(arc);
+//					arc = new Arc(ArcTypeEnum.ARC, dummyTransition, xDummyPlaceLoop);
+//					arc = petriNet.addArc(arc);
+//
+//					arc = new Arc(ArcTypeEnum.ARC, xDummyPlaceLoop, transitionEpisodeSentence);
+//					arc = petriNet.addArc(arc);
 
 					arc = new Arc(ArcTypeEnum.ARC, transitionEpisodeSentence, outDummyPlaceLoopBegin);
 					arc = petriNet.addArc(arc);

@@ -194,7 +194,7 @@ function linkById(a_id, b_id) {
 }
 
 //Petri Net Simulation
-function fireTransition(t, sec) {
+function fireTransition(t, sec, color_hex_mark) {
 
     var inbound = graph.getConnectedLinks(t, { inbound: true });
     var outbound = graph.getConnectedLinks(t, { outbound: true });
@@ -217,9 +217,9 @@ function fireTransition(t, sec) {
 
         placesBefore.forEach(function(p) {
             //enable transition
-			t.attr('.label/fill', '#b6092e');
-			t.attr('.root/fill', '#b6092e');
-			t.attr('.root/stroke', '#b6092e');
+			t.attr('.label/fill', color_hex_mark);
+			t.attr('.root/fill', color_hex_mark);
+			t.attr('.root/stroke', color_hex_mark);
 			// Let the execution finish before adjusting the value of tokens. So that we can loop over all transitions
             // and call fireTransition() on the original number of tokens.
             setTimeout(function() {
@@ -256,18 +256,18 @@ function fireTransition(t, sec) {
     }
 }
 // JSON transitions
-function simulate(transitions) {
+function simulate(transitions, color_hex_mark) {
 	
     transitions.forEach(function(t) {
         if (Math.random() < 0.7) {
-            fireTransition(t, 1);
+            fireTransition(t, 1, color_hex_mark);
         }
     });
 
     return setInterval(function() {
         transitions.forEach(function(t) {
             if (Math.random() < 0.7) {
-                fireTransition(t, 1);
+                fireTransition(t, 1, color_hex_mark);
             }
         });
     }, 2000);
@@ -278,7 +278,7 @@ function simulateHappyPath(transitions) {
 	if(simulationId != null)
 		stopSimulation(simulationId);
     
-    simulate(transitions);
+    simulate(transitions, "#4b9f27");
 }
 
 function simulateDeadlock(pathToDeadlock) {
@@ -299,7 +299,7 @@ function simulateDeadlock(pathToDeadlock) {
 		
 	}
 	
-	simulate(transitions);
+	simulate(transitions, "#E1AD0F");
 	
 }
 
@@ -347,10 +347,10 @@ function simulateNeverEnabledTransitions(neverEnabledTransitions) {
 	}
 	
 	transitions.forEach(function(t) {		
-		t.attr('.label/fill', '#f44336');
+		t.attr('.label/fill', '#1D61E1');
 		
-		t.attr('.root/fill', '#f44336');
-		t.attr('.root/stroke', '#f44336');
+		t.attr('.root/fill', '#1D61E1');
+		t.attr('.root/stroke', '#1D61E1');
 	});
 }
 
@@ -376,10 +376,10 @@ function simulateNonDeterminism(nonDeterminismTransitions) {
 	}
 	
 	transitions.forEach(function(t) {		
-		t.attr('.label/fill', '#f44336');
+		t.attr('.label/fill', '#25A4C2');
 		
-		t.attr('.root/fill', '#f44336');
-		t.attr('.root/stroke', '#f44336');
+		t.attr('.root/fill', '#25A4C2');
+		t.attr('.root/stroke', '#25A4C2');
 	});
 }
 
@@ -461,7 +461,7 @@ function show_petri_net(scenario_id){
 					
 				}	
 				
-				else if (type_node == "TRANSITION" || type_node == "TRANSITION_ALTERNATIVE") {
+				else if (type_node == "TRANSITION" || type_node == "TRANSITION_ALTERNATIVE"  || type_node == "TRANSITION_ELSE"  || type_node == "TRANSITION_DO_WHILE") {
 					var transition = createTransition(id_node, name_node, pos_x_node, pos_y_node, orientation_node);
 					jsonNodes.push(transition);
 					if (type_node == "TRANSITION")
@@ -636,7 +636,7 @@ function show_integrated_petri_net(project_id, scenario_id){
 						
 					}
 					
-				} else if (type_node == "TRANSITION" || type_node == "TRANSITION_ALTERNATIVE") {
+				} else if (type_node == "TRANSITION" || type_node == "TRANSITION_ALTERNATIVE"  || type_node == "TRANSITION_ELSE"  || type_node == "TRANSITION_DO_WHILE") {
 					var transition = createTransition(id_node, name_node, pos_x_node, pos_y_node, orientation_node);
 					jsonNodes.push(transition);
 					if (type_node == "TRANSITION")

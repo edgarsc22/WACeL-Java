@@ -28,7 +28,7 @@
         <jackson.version>2.9.5</jackson.version>
         <org.aspectj-version>1.7.4</org.aspectj-version>
 		<org.slf4j-version>1.7.5</org.slf4j-version>
-		<log4j-version>1.2.17</log4j-version>
+		<log4j-version>1.2.17</log4j-version> <!-- 2.17.1 -->
         <junit.version>4.7</junit.version>
         <model-mapper.version>2.0.0</model-mapper.version>
         <stanford.nlp.version>3.9.2</stanford.nlp.version>
@@ -372,6 +372,15 @@
 			<version>${opennlp.version}</version>
 		</dependency>
 		
+		<!-- PIPE2 - Petri Net Analysis -->
+		<dependency>
+			<groupId>uk.ac.imperial</groupId>
+			<artifactId>PIPE-SCENARIO</artifactId>
+			<scope>system</scope>
+			<version>4.3.2</version>
+			<systemPath>${basedir}\src\main\webapp\WEB-INF\lib\PIPE-SCENARIO-4.3.2.jar</systemPath>
+		</dependency>
+		
 		<!-- String Utils -->
 		<dependency>
 	    	<groupId>org.apache.commons</groupId>
@@ -397,7 +406,7 @@
 </dependencies>
 
 	<build>
-		<sourceDirectory>${basedir}/src</sourceDirectory>
+		<!-- <sourceDirectory>${basedir}/src</sourceDirectory> -->
 	  	<resources>
 	     	<resource>
 	       		<directory>src</directory>

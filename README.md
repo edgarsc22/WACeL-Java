@@ -43,7 +43,7 @@ After the user signing in, the system presents its main interface. In this inter
     
 ##### Scenario Analysis
 The scenario analysis functionality is activated after the user selects a project or a scenario. This functionality generates a feedback containing a list of detected defects
-    <img src="https://github.com/edgarsc22/WACeL-Java/blob/master/doc/gui/scenario_analysis.png" width="700">
+    <img src="https://github.com/edgarsc22/WACeL-Java/blob/master/doc/gui/scenario_analysis.jpeg" width="700">
     
 ##### Scenario to Petri Net
 Once scenarios are constructed and pre-processed, it is possible to automatically generate Petri-Net formal models from structured scenarios. Figure below shows an integrated petri-net, i.e., petri-net was derived from a scenario and their related scenarios.
