@@ -1,0 +1,6 @@
+projectKey=CL_TOOL
+serverUrl=http://localhost:9000
+serverVersion=7.9.4.35981
+dashboardUrl=http://localhost:9000/dashboard?id=CL_TOOL
+ceTaskId=AXZJmrgA4ORFqD1PAUIp
+ceTaskUrl=http://localhost:9000/api/ce/task?id=AXZJmrgA4ORFqD1PAUIp
